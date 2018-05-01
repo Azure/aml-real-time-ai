@@ -4,6 +4,7 @@ import time
 import hashlib
 import urllib
 import os
+import json
 from datetime import datetime, timedelta
 
 from amlrealtimeai.authentication.aad_authentication import AADAuthentication
@@ -233,6 +234,7 @@ class DeploymentClient:
             if operation_status_response['state'] == 'Failed':
                 print("")
                 error_message = ""
+                error_details = ""
                 if 'error' in operation_status_response:
                     if 'message' in operation_status_response['error']:
                         error_message = operation_status_response['error']['message']
