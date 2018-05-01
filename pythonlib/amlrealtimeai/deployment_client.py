@@ -347,7 +347,7 @@ class AsyncOperationFailedException(Exception):
         self.__resource_location = resource_location
 
     def __str__(self):
-        return format("{} failed with error {} ({}); Original request id: {}; {}; operation_id: {}; resource_location:", self.__friendly_operation_name, self.__error_message, self.__error_details, self.__request_id, self.__operation_type, self.__operation_id, self.__resource_location)
+        return format("{} failed with error {} ({}); Original request id: {}; {}; operation_id: {}; resource_location: {}", self.__friendly_operation_name, self.__error_message, self.__error_details, self.__request_id, self.__operation_type, self.__operation_id, self.__resource_location)
         
 
 # Keep copy of refresh token in global memory for the entire process
