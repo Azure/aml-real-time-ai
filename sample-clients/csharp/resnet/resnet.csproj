@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <EmbeddedResource Include="imagenet-classes.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\client\CSharpClient.csproj" />
+    <ProjectReference Include="..\protos\tfserving.csproj" />
+  </ItemGroup>
+
+</Project>

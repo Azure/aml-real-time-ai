@@ -286,3 +286,9 @@ __pycache__/
 *.btm.cs
 *.odx.cs
 *.xsd.cs
+
+.ipynb_checkpoints/
+.vscode
+.cache
+.pytest_cache
+*.egg-info
