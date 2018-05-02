@@ -239,7 +239,7 @@ class DeploymentClient:
                     if 'message' in operation_status_response['error']:
                         error_message = operation_status_response['error']['message']
                     if 'details' in operation_status_response['error']:
-                        error_details = json.dump(operation_status_response['error']['details'])
+                        error_details = json.dumps(operation_status_response['error']['details'])
                 raise AsyncOperationFailedException(operation_friendly_name, original_request_id, operation_status_response['operationType'], error_message, error_details, operation_status_response['id'], operation_status_response['resourceLocation'])
             print(". ", end="")
             time.sleep(5)
@@ -349,7 +349,7 @@ class AsyncOperationFailedException(Exception):
         self.__resource_location = resource_location
 
     def __str__(self):
-        return format("{} failed with error {} ({}); Original request id: {}; {}; operation_id: {}; resource_location: {}", self.__friendly_operation_name, self.__error_message, self.__error_details, self.__request_id, self.__operation_type, self.__operation_id, self.__resource_location)
+        return "{} failed with error {} ({}); Original request id: {}; {}; operation_id: {}; resource_location: {}".format(self.__friendly_operation_name, self.__error_message, self.__error_details, self.__request_id, self.__operation_type, self.__operation_id, self.__resource_location)
         
 
 # Keep copy of refresh token in global memory for the entire process
