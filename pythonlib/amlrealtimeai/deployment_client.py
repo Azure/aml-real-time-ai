@@ -5,6 +5,7 @@ import hashlib
 import urllib
 import os
 from datetime import datetime, timedelta
+import json
 
 from amlrealtimeai.authentication.aad_authentication import AADAuthentication
 from amlrealtimeai.common.http_client import HttpClient
@@ -328,9 +329,22 @@ class Service:
     def __init__(self, **entries):
         self.__dict__.update(entries)
 
+    def __repr__(self):
+        return "Service({0})".format(self.__dict__.__repr__())
+
+    def __str__(self):
+        return json.dumps(self.__dict__)
+
 class Model:
     def __init__(self, **entries):
         self.__dict__.update(entries)
+
+    def __repr__(self):
+        return "Model({0})".format(self.__dict__.__repr__())
+
+    def __str__(self):
+        return json.dumps(self.__dict__)
+
 
 
 class AsyncOperationFailedException(Exception):
