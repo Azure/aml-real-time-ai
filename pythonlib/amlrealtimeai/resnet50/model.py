@@ -90,9 +90,9 @@ class QuantizedResNet50:
         return [1, 1, 2048]
 
 class RemoteQuantizedResNet50(QuantizedResNet50):
-    def __init__(self, subscription_id, resource_group, model_management_account, model_base_path, remote_service_name = None):
+    def __init__(self, subscription_id, resource_group, model_management_account, model_base_path, remote_service_name = None, **kwargs):
         super().__init__(model_base_path)
-        self.__deployment_client = DeploymentClient(subscription_id, resource_group, model_management_account)
+        self.__deployment_client = DeploymentClient(subscription_id, resource_group, model_management_account, **kwargs)
         self.__service_name = remote_service_name if remote_service_name is not None else "featurizer-service-" + hashlib.md5((self.model_name + "-" + self.version).encode("utf-8")).hexdigest()[:6]
 
     
