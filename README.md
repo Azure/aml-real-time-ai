@@ -29,7 +29,7 @@ Follow [these instructions](docs/README.md#set-up-environment) to set up your en
 Check out the sample notebooks [here](notebooks/resnet50).  You can easily deploy a ResNet 50 classifier by running the [Quickstart notebook](notebooks/resnet50/00_QuickStart.ipynb).
 
 ## Support
-Read the [docs](docs) or email amlfpgafc@microsoft.com.
+Read the [docs](docs) or visit the [forum](https://aka.ms/aml-forum).
 
 # Contributing
 

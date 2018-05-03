@@ -4,6 +4,7 @@ import time
 import hashlib
 import urllib
 import os
+import json
 from datetime import datetime, timedelta
 
 from amlrealtimeai.authentication.aad_authentication import AADAuthentication
@@ -248,10 +249,13 @@ class DeploymentClient:
             if operation_status_response['state'] == 'Failed':
                 print("")
                 error_message = ""
+                error_details = ""
                 if 'error' in operation_status_response:
                     if 'message' in operation_status_response['error']:
                         error_message = operation_status_response['error']['message']
-                raise AsyncOperationFailedException(operation_friendly_name, original_request_id, operation_status_response['operationType'], error_message, operation_status_response['id'], operation_status_response['resourceLocation'])
+                    if 'details' in operation_status_response['error']:
+                        error_details = json.dumps(operation_status_response['error']['details'])
+                raise AsyncOperationFailedException(operation_friendly_name, original_request_id, operation_status_response['operationType'], error_message, error_details, operation_status_response['id'], operation_status_response['resourceLocation'])
             print(". ", end="")
             time.sleep(5)
 
@@ -350,16 +354,18 @@ class Model:
 
 class AsyncOperationFailedException(Exception):
 
-    def __init__(self, friendly_operation_name, request_id, operation_type, error_message, operation_id, resource_location):
+    def __init__(self, friendly_operation_name, request_id, operation_type, error_message, error_details, operation_id, resource_location):
         self.__friendly_operation_name = friendly_operation_name
         self.__request_id = request_id
         self.__operation_type = operation_type
         self.__error_message = error_message
+        self.__error_details = error_details
         self.__operation_id = operation_id
         self.__resource_location = resource_location
 
     def __str__(self):
-        return self.__friendly_operation_name + ' failed with error ' + self.__error_message + '; Original request id: ' + self.__request_id + '; ' + self.__operation_type + '; operation_id: ' + self.__operation_id + '; resource_location: ' + self.__resource_location
+        return "{} failed with error {} ({}); Original request id: {}; {}; operation_id: {}; resource_location: {}".format(self.__friendly_operation_name, self.__error_message, self.__error_details, self.__request_id, self.__operation_type, self.__operation_id, self.__resource_location)
+        
 
 # Keep copy of refresh token in global memory for the entire process
 refresh_token = None
