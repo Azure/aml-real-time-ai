@@ -19,11 +19,14 @@ _mgmnt_uri = "https://management.azure.com"
 class DeploymentClient:
     def __init__(self, subscription_id, resource_group, account, http_client = None, discovery_http_client = None,
                  use_service_principal = False, service_principal_params = None):
+        if service_principal_params is None:
+            service_principal_params = {}
         self.__subscription_id = subscription_id
         self.__resource_group = resource_group
         self.__account = account
         self.__uri, self.__location = self.__discover_mms_endpoint(subscription_id, resource_group, account, discovery_http_client)
-        self.__http_client = self.create_http_client(http_client, self.__uri, use_service_principal, **service_principal_params)
+        self.__http_client = self.create_http_client(http_client, self.__uri, use_service_principal,
+                                                     **service_principal_params)
         id = subscription_id + '_' + resource_group + '_' + account + '_' + self.__location
         self.__storage_account_name = ('fpga' + hashlib.md5(id.encode("utf-8")).hexdigest())[:24]
         self.__api_version = "2018-04-01-preview"
