@@ -23,7 +23,12 @@ def cleanup_old_test_services(client):
                 pass
 
 def get_test_config():
-    return json.load(open("/tmp/share1/test_config"))
+    result = {'test_subscription_id': os.getenv('TEST_SUBSCRIPTION_ID'),
+              'test_resource_group' : os.getenv('TEST_RESOURCE_GROUP'),
+              'test_model_management_account' : os.getenv('TEST_MODEL_MANAGEMENT_ACCOUNT')
+              }
+
+    return result
 
 def get_service_principal():
     sp_id = os.getenv('TEST_SERVICE_PRINCIPAL_ID')

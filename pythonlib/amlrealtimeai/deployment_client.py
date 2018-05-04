@@ -19,26 +19,25 @@ _mgmnt_uri = "https://management.azure.com"
 
 class DeploymentClient:
     def __init__(self, subscription_id, resource_group, account, http_client = None, discovery_http_client = None,
-                 use_service_principal = False, service_principal_params = None):
-        if service_principal_params is None:
-            service_principal_params = {}
+                 service_principal_params = None):
         self.__subscription_id = subscription_id
         self.__resource_group = resource_group
         self.__account = account
         self.__uri, self.__location = self.__discover_mms_endpoint(subscription_id, resource_group, account, discovery_http_client)
-        self.__http_client = self.create_http_client(http_client, self.__uri, use_service_principal,
-                                                     **service_principal_params)
+        self.__http_client = self.__create_http_client(http_client, self.__uri,
+                                                       service_principal_params)
         id = subscription_id + '_' + resource_group + '_' + account + '_' + self.__location
         self.__storage_account_name = ('fpga' + hashlib.md5(id.encode("utf-8")).hexdigest())[:24]
         self.__api_version = "2018-04-01-preview"
 
     @staticmethod
-    def create_http_client(http_client = None, uri = None, use_service_principal = False, tenant = None, service_principal_id = None, service_principal_key = None):
+    def __create_http_client(http_client = None, uri = None, service_principal_parameters = None):
         if http_client is not None:
             return http_client
-        elif use_service_principal is True:
-            if service_principal_id is None or service_principal_key is None:
-                raise ValueError("Must provide id and key")
+        elif service_principal_parameters is not None:
+            service_principal_id = service_principal_parameters["service_principal_id"]
+            service_principal_key = service_principal_parameters["service_principal_key"]
+            tenant = service_principal_parameters["tenant"]
             return HttpClient(uri, service_principal_token_fn(tenant, service_principal_id, service_principal_key))
         else:
             return HttpClient(uri, token_refresh_fn)

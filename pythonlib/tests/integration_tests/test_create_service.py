@@ -17,7 +17,7 @@ from amlrealtimeai.client import PredictionClient
 def test_create_update_and_delete_service():
     test_config = get_test_config()
 
-    deployment_client = DeploymentClient(test_config['test_subscription_id'], test_config['test_resource_group'], test_config['test_model_management_account'], True, get_service_principal())
+    deployment_client = DeploymentClient(test_config['test_subscription_id'], test_config['test_resource_group'], test_config['test_model_management_account'], get_service_principal())
     cleanup_old_test_services(deployment_client)
 
     id = uuid.uuid4().hex[:5]
