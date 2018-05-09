@@ -14,7 +14,7 @@ Go to the [Azure Portal](https://aka.ms/aml-create-mma) and create an Azure ML M
 
 ### Step 2: Fill out the request form
 
-[Request quota](https://forms.office.com/Pages/ResponsePage.aspx?id=v4j5cvGGr0GRqy180BHbR2nac9-PZhBDnNSV2ITz0LNURFJDR1NWMklTMU0xUTZUMjNWRkxHRzJOUC4u) by submitting the form.
+[Request quota](https://aka.ms/aml-real-time-ai-request) by submitting the form.
 
 You will need the name of your MMA from Step 1 ([learn how to get the MMA name](docs/README.md#get-mma-information)).
 
