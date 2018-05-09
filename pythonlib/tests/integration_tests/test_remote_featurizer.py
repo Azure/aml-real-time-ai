@@ -6,7 +6,7 @@ import numpy as np
 import os
 import uuid
 
-from tests.integration_tests.test_utils import override_token_funcs, get_test_config
+from tests.integration_tests.test_utils import get_service_principal, get_test_config
 
 from amlrealtimeai.deployment_client import store_refresh_token
 from amlrealtimeai.resnet50.model import RemoteQuantizedResNet50
@@ -25,14 +25,16 @@ def read_file():
     return None
     
 def test_remote_featurizer_local_usage():
-    override_token_funcs()
     test_config = get_test_config()
 
     in_images = tf.placeholder(tf.string)
     image_tensors = preprocess_array(in_images)
 
     remote_service_name = ("int-test-featurizer-svc-" + str(uuid.uuid4()))[:30]
-    featurizer = RemoteQuantizedResNet50(test_config['test_subscription_id'], test_config['test_resource_group'], test_config['test_model_management_account'], os.path.expanduser("~/models"), remote_service_name)
+    featurizer = RemoteQuantizedResNet50(test_config['test_subscription_id'], test_config['test_resource_group'],
+                                         test_config['test_model_management_account'], os.path.expanduser("~/models"),
+                                         remote_service_name, use_service_principal = True,
+                                         service_principal_params = get_service_principal())
     featurizer.import_graph_def(include_top=True, include_featurizer=True, input_tensor=image_tensors)
 
     try:
@@ -61,10 +63,11 @@ def test_remote_featurizer_local_usage():
 
 
 def test_remote_featurizer_create_package_and_service():
-    override_token_funcs()
     test_config = get_test_config()
 
-    deployment_client = DeploymentClient(test_config['test_subscription_id'], test_config['test_resource_group'], test_config['test_model_management_account'])
+    deployment_client = DeploymentClient(test_config['test_subscription_id'], test_config['test_resource_group'],
+                                         test_config['test_model_management_account'],
+                                         use_service_principal = True, service_principal_params = get_service_principal())
 
     id = uuid.uuid4().hex[:5]
     model_name = "int-test-rf-model-" + id
