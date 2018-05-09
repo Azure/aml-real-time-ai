@@ -5,8 +5,6 @@ import tensorflow as tf
 import numpy as np
 import os
 
-from tests.integration_tests.test_utils import override_token_funcs
-
 from amlrealtimeai.resnet50.model import LocalQuantizedResNet50
 from amlrealtimeai.resnet50.utils import preprocess_array
 

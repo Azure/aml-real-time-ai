@@ -18,15 +18,25 @@ from msrest.authentication import BasicTokenAuthentication
 _mgmnt_uri = "https://management.azure.com"
 
 class DeploymentClient:
-    def __init__(self, subscription_id, resource_group, account, http_client = None, discovery_http_client = None):
+    def __init__(self, subscription_id, resource_group, account, service_principal_params = None):
         self.__subscription_id = subscription_id
         self.__resource_group = resource_group
         self.__account = account
-        self.__uri, self.__location = self.__discover_mms_endpoint(subscription_id, resource_group, account, discovery_http_client)
-        self.__http_client = http_client if http_client is not None else HttpClient(self.__uri, token_refresh_fn)
+        self.__uri, self.__location = self.__discover_mms_endpoint(subscription_id, resource_group, account)
+        self.__http_client = self._create_http_client(self.__uri, service_principal_params)
         id = subscription_id + '_' + resource_group + '_' + account + '_' + self.__location
         self.__storage_account_name = ('fpga' + hashlib.md5(id.encode("utf-8")).hexdigest())[:24]
         self.__api_version = "2018-04-01-preview"
+
+    @staticmethod
+    def _create_http_client(uri, service_principal_parameters = None):
+        if service_principal_parameters is not None:
+            service_principal_id = service_principal_parameters["service_principal_id"]
+            service_principal_key = service_principal_parameters["service_principal_key"]
+            tenant = service_principal_parameters["tenant"]
+            return HttpClient(uri, service_principal_token_fn(tenant, service_principal_id, service_principal_key))
+        else:
+            return HttpClient(uri, token_refresh_fn)
 
     def register_model(self, model_name, service_def):
         storage_account_key = self.__create_storage_account_and_get_key()
@@ -320,8 +330,8 @@ class DeploymentClient:
                 hash_md5.update(chunk)
         return hash_md5.hexdigest()
 
-    def __discover_mms_endpoint(self, subscription_id, resource_group, account, http_client):
-        http_client = http_client if http_client is not None else HttpClient(_mgmnt_uri, token_refresh_fn)
+    def __discover_mms_endpoint(self, subscription_id, resource_group, account):
+        http_client = self._create_http_client(_mgmnt_uri)
         endpoint_lookup_response = http_client.get('/subscriptions/' + subscription_id + '/resourcegroups/' + resource_group + '/providers/Microsoft.MachineLearningModelManagement/accounts/' + account + '?api-version=2017-09-01-preview').json()
         mms_location = endpoint_lookup_response['properties']['modelManagementSwaggerLocation']
         end_pos = mms_location.index('/', len('https://'))
@@ -362,6 +372,25 @@ def store_refresh_token(new_token):
 def load_refresh_token():
     global refresh_token
     return refresh_token
+
+class service_principal_token_fn:
+    def __init__(self,tenant, sp_id, sp_key):
+        self.tenant = tenant
+        self.sp_id = sp_id
+        self.sp_key = sp_key
+
+    def __call__(self):
+        opts = dict({
+            "authuri": "https://login.microsoftonline.com",
+            "tenant": self.tenant,
+            "clientid": self.sp_id,
+            "service_principal_key": self.sp_key,
+            "resource": "https://management.core.windows.net/"
+        })
+        auth = AADAuthentication (opts, print, store_refresh_token, load_refresh_token)
+        token = auth.acquire_token()
+
+        return token
 
 def token_refresh_fn():
     options = {
