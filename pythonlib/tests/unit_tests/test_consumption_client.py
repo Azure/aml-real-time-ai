@@ -129,7 +129,7 @@ def test_create_new_channel_after_timeout_expires():
         channel_mock_loaded['value'] += 1
         return channel_mock
 
-    beginning = datetime.now()
+    now = datetime.now()
 
     channel_mock = mock.Mock()
     channel_mock.unary_unary = mock.MagicMock(side_effect=unary_unary)
@@ -139,20 +139,25 @@ def test_create_new_channel_after_timeout_expires():
     image_file.write("abc")
     image_file.close()
 
-    client = PredictionClient("localhost", 50051, channel_max_age=timedelta(minutes=1))
-    client._channel_func = load_channel_mock
-    
-    client._get_datetime_now = lambda: beginning
+    client = PredictionClient("localhost", 50051, channel_shutdown_timeout=timedelta(minutes=1))
+    client._channel_func = load_channel_mock    
+    client._get_datetime_now = lambda: now
+
     result = client.score_image(image_file_path)
     assert all([x == y for x, y in zip(result, [1, 2, 3])])
     assert channel_mock_loaded['value'] == 1
 
-    client._get_datetime_now = lambda: beginning.__add__(timedelta(seconds=50))
+    now = now + timedelta(seconds=50)
     result = client.score_image(image_file_path)
     assert all([x == y for x, y in zip(result, [1, 2, 3])])
     assert channel_mock_loaded['value'] == 1
 
-    client._get_datetime_now = lambda: beginning.__add__(timedelta(seconds=70))
+    now = now + timedelta(seconds=20)
+    result = client.score_image(image_file_path)
+    assert all([x == y for x, y in zip(result, [1, 2, 3])])
+    assert channel_mock_loaded['value'] == 1
+
+    now = now + timedelta(seconds=70)
     result = client.score_image(image_file_path)
     assert all([x == y for x, y in zip(result, [1, 2, 3])])
     assert channel_mock_loaded['value'] == 2

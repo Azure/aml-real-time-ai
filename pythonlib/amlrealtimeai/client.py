@@ -23,7 +23,7 @@ except ImportError:
 
 class PredictionClient:
 
-    def __init__(self, address: str, port: int, use_ssl:bool = False, access_token:str = "", channel_max_age:timedelta = timedelta(minutes=2)):
+    def __init__(self, address: str, port: int, use_ssl:bool = False, access_token:str = "", channel_shutdown_timeout:timedelta = timedelta(minutes=2)):
         if(address is None):
             raise ValueError("address")
 
@@ -40,7 +40,7 @@ class PredictionClient:
         else:
             self._channel_func = lambda: grpc.insecure_channel(host)
 
-        self.__channel_max_age = channel_max_age
+        self.__channel_shutdown_timeout = channel_shutdown_timeout
         self.__channel_usable_until = None
 
 
@@ -84,8 +84,8 @@ class PredictionClient:
             self.__stub = None
             # Shutdown old channel
             self.__channel = self._channel_func()
-            self.__channel_usable_until = self._get_datetime_now() + self.__channel_max_age
             self.__stub = prediction_service_pb2_grpc.PredictionServiceStub(self.__channel)
+        self.__channel_usable_until = self._get_datetime_now() + self.__channel_shutdown_timeout
         return self.__stub
 
     def __predict(self, request, timeout):
