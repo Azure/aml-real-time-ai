@@ -43,7 +43,7 @@ class DeploymentClient:
 
         print("Registering model " + model_name)
         url = self.__upload_model(model_name, service_def, cloud_storage_account)
-        register_model_result = self.__register_model_with_mms(model_name, url)
+        register_model_result = self.register_model_with_mms(model_name, url)
         print("Successfully registered model " + model_name)
         return register_model_result['id']
 
@@ -222,7 +222,12 @@ class DeploymentClient:
         sas_token = storage_service.generate_blob_shared_access_signature(container_name, blob_name, BlobPermissions.READ, datetime.utcnow() + timedelta(days=365 * 5))
         return storage_service.make_blob_url(container_name, blob_name, sas_token=sas_token)
 
-    def __register_model_with_mms(self, model_name, url):
+    def register_model_with_mms(self, model_name, url):
+        """
+        Register Model With MMS
+        :model_name: name of the model
+        :url: SAS url to azure storage blob 
+        """
         body = {
             "name": model_name,
             "mimeType": "application/zip",
