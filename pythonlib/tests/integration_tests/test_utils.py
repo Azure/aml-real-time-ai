@@ -2,6 +2,7 @@
 # Licensed under the MIT License
 import os
 import json
+from collections import namedtuple
 
 from datetime import datetime, timezone
 from dateutil.parser import parse
@@ -22,23 +23,23 @@ def cleanup_old_test_services(client):
                 pass
 
 def get_test_config():
-    return json.load(open("/tmp/share1/test_config"))
+    result = {'test_subscription_id': os.getenv('TEST_SUBSCRIPTION_ID'),
+              'test_resource_group' : os.getenv('TEST_RESOURCE_GROUP'),
+              'test_model_management_account' : os.getenv('TEST_MODEL_MANAGEMENT_ACCOUNT')
+              }
 
-def override_token_funcs():
-    deployment_client.store_refresh_token = lambda t: __save_refresh_token(t)
-    deployment_client.load_refresh_token = lambda: __load_refresh_token()
+    return result
 
-def __save_refresh_token(token):
-    file_name = "/tmp/share1/refresh_token"
-    file = open(file_name, "w")
-    file.write(token)
-    file.close()
+def get_service_principal():
+    sp_id = os.getenv('TEST_SERVICE_PRINCIPAL_ID')
+    sp_key = os.getenv('TEST_SERVICE_PRINCIPAL_KEY')
+    tenant = os.getenv('TEST_TENANT')
 
-def __load_refresh_token():
-    file_name = "/tmp/share1/refresh_token"
-    if os.path.isfile(file_name):
-        file = open(file_name, "r")
-        token = file.read()
-        file.close()
-        return token
-    return None
+    if (not sp_id):
+        raise Exception("Service Principal Id not found")
+    if (not sp_key):
+        raise Exception("Service Principal Key not found")
+    if (not tenant):
+        raise Exception("Tenant not found")
+    Aad_Record = namedtuple("AadRecord", ['tenant','service_principal_id', 'service_principal_key'])
+    return Aad_Record(tenant, sp_id, sp_key)

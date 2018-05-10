@@ -7,6 +7,7 @@ import grpc
 import tensorflow as tf
 import numpy as np
 from unittest import mock
+from datetime import datetime, timedelta
 
 try:
     from tensorflow.core.framework import tensor_shape_pb2
@@ -54,12 +55,12 @@ def test_score_image():
     image_file.close()
 
     client = PredictionClient("localhost", 50051)
-    client.stub = stub_mock
+    client._get_grpc_stub = lambda: stub_mock
 
     result = client.score_image(image_file_path)
     assert all([x == y for x, y in zip(result, [1, 2, 3])])
 
-    
+
 def test_score_numpy_array():
 
     def predict_mock(request, timeout):
@@ -77,7 +78,7 @@ def test_score_numpy_array():
     stub_mock.Predict = mock.MagicMock(side_effect=predict_mock)
 
     client = PredictionClient("localhost", 50051)
-    client.stub = stub_mock
+    client._get_grpc_stub = lambda: stub_mock
 
     result = client.score_numpy_array(np.asarray([[1, 2, 3], [4, 5, 6]], dtype='f'))
     assert all([x == y for x, y in zip(result[0], [ 11, 22, 33 ])])
@@ -106,7 +107,57 @@ def test_retrying_rpc_exception():
     stub_mock.Predict = mock.MagicMock(side_effect=predict_mock)
 
     client = PredictionClient("localhost", 50051)
-    client.stub = stub_mock
+    client._get_grpc_stub = lambda: stub_mock
 
     result = client.score_numpy_array(np.asarray([[1, 2]], dtype='f'))
     assert all([x == y for x, y in zip(result[0], [ 11, 22 ])])
+
+
+def test_create_new_channel_after_timeout_expires():
+
+    channel_mock_loaded = { 'value': 0 }
+
+    def unary_unary(id, request_serializer, response_deserializer):
+        result = mock.MagicMock()
+        if id == '/tensorflow.serving.PredictionService/Predict':
+            return_data = np.asarray([[ 1, 2, 3 ]])
+            return_tensor = tf.contrib.util.make_tensor_proto(return_data, types_pb2.DT_FLOAT, return_data.shape)
+            result.outputs = { "output_alias": return_tensor }
+        return lambda req, timeout: result
+
+    def load_channel_mock():
+        channel_mock_loaded['value'] += 1
+        return channel_mock
+
+    now = datetime.now()
+
+    channel_mock = mock.Mock()
+    channel_mock.unary_unary = mock.MagicMock(side_effect=unary_unary)
+
+    image_file_path = os.path.join(tempfile.mkdtemp(), "img.png")
+    image_file = open(image_file_path, "w")
+    image_file.write("abc")
+    image_file.close()
+
+    client = PredictionClient("localhost", 50051, channel_shutdown_timeout=timedelta(minutes=1))
+    client._channel_func = load_channel_mock    
+    client._get_datetime_now = lambda: now
+
+    result = client.score_image(image_file_path)
+    assert all([x == y for x, y in zip(result, [1, 2, 3])])
+    assert channel_mock_loaded['value'] == 1
+
+    now = now + timedelta(seconds=50)
+    result = client.score_image(image_file_path)
+    assert all([x == y for x, y in zip(result, [1, 2, 3])])
+    assert channel_mock_loaded['value'] == 1
+
+    now = now + timedelta(seconds=20)
+    result = client.score_image(image_file_path)
+    assert all([x == y for x, y in zip(result, [1, 2, 3])])
+    assert channel_mock_loaded['value'] == 1
+
+    now = now + timedelta(seconds=70)
+    result = client.score_image(image_file_path)
+    assert all([x == y for x, y in zip(result, [1, 2, 3])])
+    assert channel_mock_loaded['value'] == 2
