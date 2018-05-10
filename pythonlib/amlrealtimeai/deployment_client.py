@@ -22,21 +22,23 @@ class DeploymentClient:
         self.__subscription_id = subscription_id
         self.__resource_group = resource_group
         self.__account = account
-        self.__uri, self.__location = self.__discover_mms_endpoint(subscription_id, resource_group, account, service_principal_params)
-        self.__http_client = self._create_http_client(self.__uri, service_principal_params)
+        if service_principal_params is not None:
+            DeploymentClient.__get_access_token = lambda: service_principal_token_fn(service_principal_params.tenant, 
+                service_principal_params.service_principal_id, 
+                service_principal_params.service_principal_key)        
+        self.__uri, self.__location = self.__discover_mms_endpoint(subscription_id, resource_group, account)
+        self.__http_client = self._create_http_client(self.__uri)
         id = subscription_id + '_' + resource_group + '_' + account + '_' + self.__location
         self.__storage_account_name = ('fpga' + hashlib.md5(id.encode("utf-8")).hexdigest())[:24]
         self.__api_version = "2018-04-01-preview"
 
     @staticmethod
-    def _create_http_client(uri, service_principal_parameters):
-        if service_principal_parameters is not None:
-            service_principal_id = service_principal_parameters.service_principal_id
-            service_principal_key = service_principal_parameters.service_principal_key
-            tenant = service_principal_parameters.tenant
-            return HttpClient(uri, service_principal_token_fn(tenant, service_principal_id, service_principal_key))
-        else:
-            return HttpClient(uri, token_refresh_fn)
+    def _create_http_client(uri):
+        return HttpClient(uri, DeploymentClient.__get_access_token())
+
+    @staticmethod
+    def __get_access_token():
+        return default_token_refresh_fn()
 
     def register_model(self, model_name, service_def):
         storage_account_key = self.__create_storage_account_and_get_key()
@@ -256,7 +258,7 @@ class DeploymentClient:
 
 
     def __create_storage_account_and_get_key(self):
-        basic_token_auth = BasicTokenAuthentication({'access_token': token_refresh_fn()})
+        basic_token_auth = BasicTokenAuthentication({'access_token': self.__get_access_token()})
         client = StorageManagementClient(basic_token_auth, self.__subscription_id)
 
         storage_accounts = list(client.storage_accounts.list_by_resource_group(self.__resource_group))
@@ -330,8 +332,8 @@ class DeploymentClient:
                 hash_md5.update(chunk)
         return hash_md5.hexdigest()
 
-    def __discover_mms_endpoint(self, subscription_id, resource_group, account, service_principal_params):
-        http_client = self._create_http_client(_mgmnt_uri, service_principal_params)
+    def __discover_mms_endpoint(self, subscription_id, resource_group, account):
+        http_client = self._create_http_client(_mgmnt_uri)
         endpoint_lookup_response = http_client.get('/subscriptions/' + subscription_id + '/resourcegroups/' + resource_group + '/providers/Microsoft.MachineLearningModelManagement/accounts/' + account + '?api-version=2017-09-01-preview').json()
         mms_location = endpoint_lookup_response['properties']['modelManagementSwaggerLocation']
         end_pos = mms_location.index('/', len('https://'))
@@ -392,7 +394,7 @@ class service_principal_token_fn:
 
         return token
 
-def token_refresh_fn():
+def default_token_refresh_fn():
     options = {
         "authuri": "https://login.microsoftonline.com",
         "tenant": "common",
