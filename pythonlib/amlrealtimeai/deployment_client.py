@@ -387,7 +387,7 @@ class service_principal_token_fn:
             "service_principal_key": self.sp_key,
             "resource": "https://management.core.windows.net/"
         })
-        auth = AADAuthentication (opts, print, store_refresh_token, load_refresh_token)
+        auth = AADAuthentication (opts, print)
         token = auth.acquire_token()
 
         return token
