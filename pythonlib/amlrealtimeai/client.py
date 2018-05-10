@@ -5,6 +5,7 @@ import tensorflow as tf
 import tensorflow.contrib
 import grpc
 import time
+from datetime import datetime, timedelta
 
 try:
     from tensorflow_serving.apis import predict_pb2
@@ -22,7 +23,7 @@ except ImportError:
 
 class PredictionClient:
 
-    def __init__(self, address: str, port: int, use_ssl:bool = False, access_token:str = ""):
+    def __init__(self, address: str, port: int, use_ssl:bool = False, access_token:str = "", channel_shutdown_timeout:timedelta = timedelta(minutes=2)):
         if(address is None):
             raise ValueError("address")
 
@@ -33,12 +34,15 @@ class PredictionClient:
         metadata_transormer = (lambda x:[('authorization', access_token)])
         grpc.composite_channel_credentials(grpc.ssl_channel_credentials(),
                                            grpc.metadata_call_credentials(metadata_transormer))
-        if use_ssl:
-            self.channel = grpc.secure_channel(host, grpc.ssl_channel_credentials())
-        else:
-            self.channel = grpc.insecure_channel(host)
 
-        self.stub = prediction_service_pb2_grpc.PredictionServiceStub(self.channel)
+        if use_ssl:
+            self._channel_func = lambda: grpc.secure_channel(host, grpc.ssl_channel_credentials())
+        else:
+            self._channel_func = lambda: grpc.insecure_channel(host)
+
+        self.__channel_shutdown_timeout = channel_shutdown_timeout
+        self.__channel_usable_until = None
+
 
     def score_numpy_array(self, npdata):
         request = predict_pb2.PredictRequest()
@@ -72,17 +76,30 @@ class PredictionClient:
         request.inputs['images'].tensor_shape.dim.extend(self.make_dim_list(shape))
         return self.__predict(request, timeout)
 
+    def _get_datetime_now(self):
+        return datetime.now()
+
+    def _get_grpc_stub(self):
+        if(self.__channel_usable_until is None or self.__channel_usable_until < self._get_datetime_now()):
+            self.__stub = None
+            # Shutdown old channel
+            self.__channel = self._channel_func()
+            self.__stub = prediction_service_pb2_grpc.PredictionServiceStub(self.__channel)
+        self.__channel_usable_until = self._get_datetime_now() + self.__channel_shutdown_timeout
+        return self.__stub
+
     def __predict(self, request, timeout):
         retry_count = 5
         sleep_delay = 1
 
         while(True):
             try:
-                result = self.stub.Predict(request, timeout)
+                result = self._get_grpc_stub().Predict(request, timeout)
                 return result.outputs["output_alias"]
-            except grpc.RpcError:
+            except grpc.RpcError as rpcError:
                 retry_count = retry_count - 1
                 if(retry_count <= 0):
                     raise
                 time.sleep(sleep_delay)
                 sleep_delay = sleep_delay * 2
+                print("Retrying", rpcError)
