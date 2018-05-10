@@ -5,6 +5,7 @@ import os
 import uuid
 import tensorflow as tf
 import numpy as np
+import time
 
 from tests.integration_tests.test_utils import get_service_principal, get_test_config, cleanup_old_test_services
 
@@ -58,6 +59,12 @@ def test_create_update_and_delete_service():
 
     second_model_id = deployment_client.register_model(model_name, service_def_path)
     deployment_client.update_service(service.id, second_model_id)
+
+    result = prediction_client.score_image("/tmp/share1/shark.jpg")
+    assert all([x == y for x, y in zip(np.array(result).shape, [1, 1, 2048])])
+
+    # wait for timeout of Azure LB
+    time.sleep(4 * 60 + 10)
 
     result = prediction_client.score_image("/tmp/share1/shark.jpg")
     assert all([x == y for x, y in zip(np.array(result).shape, [1, 1, 2048])])
