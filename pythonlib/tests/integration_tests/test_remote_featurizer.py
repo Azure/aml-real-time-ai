@@ -79,7 +79,7 @@ def test_remote_featurizer_create_package_and_service():
 
     remote_service_name = ("int-test-featurizer-svc-" + str(uuid.uuid4()))[:30]
     
-    model = RemoteQuantizedResNet50(test_config['test_subscription_id'], test_config['test_resource_group'], test_config['test_model_management_account'], os.path.expanduser("~/models"), remote_service_name)
+    model = RemoteQuantizedResNet50(test_config['test_subscription_id'], test_config['test_resource_group'], test_config['test_model_management_account'], os.path.expanduser("~/models"), remote_service_name, service_principal_params = get_service_principal())
     model.import_graph_def(include_featurizer=True, input_tensor=image_tensors)
 
     service_def = ServiceDefinition()
