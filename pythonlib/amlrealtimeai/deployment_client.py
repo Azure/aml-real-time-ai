@@ -31,9 +31,9 @@ class DeploymentClient:
     @staticmethod
     def _create_http_client(uri, service_principal_parameters):
         if service_principal_parameters is not None:
-            service_principal_id = service_principal_parameters["service_principal_id"]
-            service_principal_key = service_principal_parameters["service_principal_key"]
-            tenant = service_principal_parameters["tenant"]
+            service_principal_id = service_principal_parameters.service_principal_id
+            service_principal_key = service_principal_parameters.service_principal_key
+            tenant = service_principal_parameters.tenant
             return HttpClient(uri, service_principal_token_fn(tenant, service_principal_id, service_principal_key))
         else:
             return HttpClient(uri, token_refresh_fn)
