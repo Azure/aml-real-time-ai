@@ -40,7 +40,7 @@ def test_list_services():
     http_client_mock.host = "https://testhost.com"
     http_client_mock.get = mock.MagicMock(side_effect=lambda uri: get_response_mock(get_results[uri]))
 
-    DeploymentClient._create_http_client = lambda uri: discovery_http_client_mock if uri is deployment_client._mgmnt_uri else http_client_mock
+    DeploymentClient._create_http_client = lambda self, uri, service_principal_params: discovery_http_client_mock if uri is deployment_client._mgmnt_uri else http_client_mock
     client = DeploymentClient("test_subscription_id", "test_resource_group", "test_mma")
 
     service_list = list(client.list_services())
