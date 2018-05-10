@@ -23,22 +23,19 @@ class DeploymentClient:
         self.__resource_group = resource_group
         self.__account = account
         if service_principal_params is not None:
-            DeploymentClient.__get_access_token = lambda: service_principal_token_fn(service_principal_params.tenant, 
+            self.__get_access_token = lambda: service_principal_token_fn(service_principal_params.tenant, 
                 service_principal_params.service_principal_id, 
-                service_principal_params.service_principal_key)        
+                service_principal_params.service_principal_key)
+        else:
+            self.__get_access_token = default_token_refresh_fn     
         self.__uri, self.__location = self.__discover_mms_endpoint(subscription_id, resource_group, account)
         self.__http_client = self._create_http_client(self.__uri)
         id = subscription_id + '_' + resource_group + '_' + account + '_' + self.__location
         self.__storage_account_name = ('fpga' + hashlib.md5(id.encode("utf-8")).hexdigest())[:24]
         self.__api_version = "2018-04-01-preview"
 
-    @staticmethod
-    def _create_http_client(uri):
-        return HttpClient(uri, DeploymentClient.__get_access_token())
-
-    @staticmethod
-    def __get_access_token():
-        return default_token_refresh_fn()
+    def _create_http_client(self, uri):
+        return HttpClient(uri, self.__get_access_token)
 
     def register_model(self, model_name, service_def):
         storage_account_key = self.__create_storage_account_and_get_key()
