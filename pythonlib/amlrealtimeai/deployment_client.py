@@ -18,15 +18,24 @@ from msrest.authentication import BasicTokenAuthentication
 _mgmnt_uri = "https://management.azure.com"
 
 class DeploymentClient:
-    def __init__(self, subscription_id, resource_group, account, http_client = None, discovery_http_client = None):
+    def __init__(self, subscription_id, resource_group, account, service_principal_params = None):
         self.__subscription_id = subscription_id
         self.__resource_group = resource_group
         self.__account = account
-        self.__uri, self.__location = self.__discover_mms_endpoint(subscription_id, resource_group, account, discovery_http_client)
-        self.__http_client = http_client if http_client is not None else HttpClient(self.__uri, token_refresh_fn)
+        if service_principal_params is not None:
+            self.__get_access_token = lambda: service_principal_token_fn(service_principal_params.tenant, 
+                service_principal_params.service_principal_id, 
+                service_principal_params.service_principal_key)
+        else:
+            self.__get_access_token = default_token_fn     
+        self.__uri, self.__location = self.__discover_mms_endpoint(subscription_id, resource_group, account)
+        self.__http_client = self._create_http_client(self.__uri)
         id = subscription_id + '_' + resource_group + '_' + account + '_' + self.__location
         self.__storage_account_name = ('fpga' + hashlib.md5(id.encode("utf-8")).hexdigest())[:24]
         self.__api_version = "2018-04-01-preview"
+
+    def _create_http_client(self, uri):
+        return HttpClient(uri, self.__get_access_token)
 
     def register_model(self, model_name, service_def):
         storage_account_key = self.__create_storage_account_and_get_key()
@@ -251,7 +260,7 @@ class DeploymentClient:
 
 
     def __create_storage_account_and_get_key(self):
-        basic_token_auth = BasicTokenAuthentication({'access_token': token_refresh_fn()})
+        basic_token_auth = BasicTokenAuthentication({'access_token': self.__get_access_token()})
         client = StorageManagementClient(basic_token_auth, self.__subscription_id)
 
         storage_accounts = list(client.storage_accounts.list_by_resource_group(self.__resource_group))
@@ -325,8 +334,8 @@ class DeploymentClient:
                 hash_md5.update(chunk)
         return hash_md5.hexdigest()
 
-    def __discover_mms_endpoint(self, subscription_id, resource_group, account, http_client):
-        http_client = http_client if http_client is not None else HttpClient(_mgmnt_uri, token_refresh_fn)
+    def __discover_mms_endpoint(self, subscription_id, resource_group, account):
+        http_client = self._create_http_client(_mgmnt_uri)
         endpoint_lookup_response = http_client.get('/subscriptions/' + subscription_id + '/resourcegroups/' + resource_group + '/providers/Microsoft.MachineLearningModelManagement/accounts/' + account + '?api-version=2017-09-01-preview').json()
         mms_location = endpoint_lookup_response['properties']['modelManagementSwaggerLocation']
         end_pos = mms_location.index('/', len('https://'))
@@ -368,7 +377,20 @@ def load_refresh_token():
     global refresh_token
     return refresh_token
 
-def token_refresh_fn():
+def service_principal_token_fn(tenant, sp_id, sp_key):
+    opts = dict({
+        "authuri": "https://login.microsoftonline.com",
+        "tenant": tenant,
+        "clientid": sp_id,
+        "service_principal_key": sp_key,
+        "resource": "https://management.core.windows.net/"
+    })
+    auth = AADAuthentication (opts, print)
+    token = auth.acquire_token()
+
+    return token
+
+def default_token_fn():
     options = {
         "authuri": "https://login.microsoftonline.com",
         "tenant": "common",
