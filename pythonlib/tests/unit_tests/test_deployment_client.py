@@ -3,7 +3,8 @@
 import pytest
 from unittest import mock
 
-from amlrealtimeai.deployment_client import DeploymentClient
+from amlrealtimeai import deployment_client
+from amlrealtimeai.deployment_client import DeploymentClient, Service, Model
 from amlrealtimeai.common.http_client import HttpClient
 
 
@@ -39,7 +40,8 @@ def test_list_services():
     http_client_mock.host = "https://testhost.com"
     http_client_mock.get = mock.MagicMock(side_effect=lambda uri: get_response_mock(get_results[uri]))
 
-    client = DeploymentClient("test_subscription_id", "test_resource_group", "test_mma", http_client_mock, discovery_http_client_mock)
+    DeploymentClient._create_http_client = lambda self, uri: discovery_http_client_mock if uri is deployment_client._mgmnt_uri else http_client_mock
+    client = DeploymentClient("test_subscription_id", "test_resource_group", "test_mma")
 
     service_list = list(client.list_services())
 
@@ -138,8 +140,9 @@ def setup_mock_client_for_deploy():
     http_client_mock.put = mock.MagicMock(get_operation_location_mock("service-id"))
     http_client_mock.get = mock.MagicMock(
         return_value=get_response_mock({"state": "Succeeded", "resourceLocation": "location"}))
-    client = DeploymentClient("test_subscription_id", "test_resource_group", "test_mma",
-                              http_client_mock, discovery_http_client_mock)
+
+    DeploymentClient._create_http_client = lambda self, uri: discovery_http_client_mock if uri is deployment_client._mgmnt_uri else http_client_mock
+    client = DeploymentClient("test_subscription_id", "test_resource_group", "test_mma")
     return client, http_client_mock
 
 
@@ -368,3 +371,20 @@ def test_regenerate_keys_has_sends_empty_if_called_with_none():
     client.regenerate_auth_keys("name")
 
     http_client_mock.post.assert_called_with(regenerate_keys_uri,json=None)
+
+
+def test_print_service():
+    service = Service(id="id", state="Success", ip="0.0.0.0", port=80)
+    assert r'{"id": "id", "state": "Success", "ip": "0.0.0.0", "port": 80}' == service.__str__()
+
+def test_repr_service():
+    service = Service(id="id", state="Success", ip="0.0.0.0", port=80)
+    assert r"Service({'id': 'id', 'state': 'Success', 'ip': '0.0.0.0', 'port': 80})" == service.__repr__()
+
+def test_print_model():
+    model = Model(id="id", state="Success", name="new_model")
+    assert r'{"id": "id", "state": "Success", "name": "new_model"}' == model.__str__()
+
+def test_repr_model():
+    model = Model(id="id", state="Success", name="new_model")
+    assert r"Model({'id': 'id', 'state': 'Success', 'name': 'new_model'})" == model.__repr__()

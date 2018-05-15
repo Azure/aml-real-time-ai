@@ -55,6 +55,11 @@ class AADAuthentication(object):
                 opts['password'],
                 clientid)
 
+        elif 'service_principal_key' in opts:
+            # -- acquire_token_with service principal key --
+
+            token = ctx.acquire_token_with_client_credentials(resource, clientid, opts['service_principal_key'])
+
         elif 'code' in opts:
             # --- acquire_token_with_device_code with existing `code` ---
 
