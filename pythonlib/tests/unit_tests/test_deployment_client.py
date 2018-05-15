@@ -4,7 +4,7 @@ import pytest
 from unittest import mock
 
 from amlrealtimeai import deployment_client
-from amlrealtimeai.deployment_client import DeploymentClient
+from amlrealtimeai.deployment_client import DeploymentClient, Service, Model
 from amlrealtimeai.common.http_client import HttpClient
 
 
@@ -371,3 +371,20 @@ def test_regenerate_keys_has_sends_empty_if_called_with_none():
     client.regenerate_auth_keys("name")
 
     http_client_mock.post.assert_called_with(regenerate_keys_uri,json=None)
+
+
+def test_print_service():
+    service = Service(id="id", state="Success", ip="0.0.0.0", port=80)
+    assert r'{"id": "id", "state": "Success", "ip": "0.0.0.0", "port": 80}' == service.__str__()
+
+def test_repr_service():
+    service = Service(id="id", state="Success", ip="0.0.0.0", port=80)
+    assert r"Service({'id': 'id', 'state': 'Success', 'ip': '0.0.0.0', 'port': 80})" == service.__repr__()
+
+def test_print_model():
+    model = Model(id="id", state="Success", name="new_model")
+    assert r'{"id": "id", "state": "Success", "name": "new_model"}' == model.__str__()
+
+def test_repr_model():
+    model = Model(id="id", state="Success", name="new_model")
+    assert r"Model({'id': 'id', 'state': 'Success', 'name': 'new_model'})" == model.__repr__()
