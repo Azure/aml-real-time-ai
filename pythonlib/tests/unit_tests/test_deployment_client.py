@@ -3,6 +3,7 @@
 import pytest
 from unittest import mock
 
+from amlrealtimeai import deployment_client
 from amlrealtimeai.deployment_client import DeploymentClient, Service, Model
 from amlrealtimeai.common.http_client import HttpClient
 
