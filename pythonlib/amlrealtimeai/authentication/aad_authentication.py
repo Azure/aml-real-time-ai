@@ -28,7 +28,7 @@ class AADAuthentication(object):
         resource = opts['resource']
         clientid = opts['clientid']
 
-        authorization_uri = opts['authorization_uri'] if opts['authorization_uri'] is not None else authuri + '/' + tenant
+        authorization_uri = opts['authorization_uri'] if 'authorization_uri' in opts else authuri + '/' + tenant
 
         ctx = adal.AuthenticationContext(authorization_uri, api_version=None)
 

@@ -8,6 +8,7 @@ import time
 import requests
 import logging
 
+from collections import namedtuple
 from requests import RequestException, ConnectionError, HTTPError
 
 # python 2 and python 3 compatibility library
@@ -259,12 +260,16 @@ class HttpClient(object):
                     continue
 
             if response.status_code == 401 and not self.access_token_fn is None:
-                # if response.json()['error']['code'] == 'Invalid'
-                # map(lambda x: x, response.headers['WWW-Authenticate'].split(" "))
+                authorization_uri_override = None
+
+                if response.json()['error']['code'] == 'InvalidAuthenticationTokenTenant':
+                    parsed_headers = dict(lambda x: namedtuple(x.split('=')[0], x.split('=')[1]), response.headers['WWW-Authenticate'].split(" "))
+                    if 'authorization_uri' in parsed_headers:
+                        authorization_uri_override = parsed_headers['authorization_uri']
 
                 retry_count = retry_count - 1
                 if retry_count > 0:
-                    self.authorization = self.access_token_fn()
+                    self.authorization = self.access_token_fn(authorization_uri_override)
                     continue
 
             try:
