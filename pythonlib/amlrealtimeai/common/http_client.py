@@ -2,6 +2,7 @@
 # Licensed under the MIT License.
 from __future__ import absolute_import
 
+import jwt
 import json as jsonFuncs
 import time
 import requests
@@ -43,7 +44,9 @@ class HttpClient(object):
         
         # --- Set common defaults: User-Agent, Content-Type, Accept ---
         if not access_token_fn is None:
-            self.authorization = access_token_fn()
+            access_token = access_token_fn()
+            print(jwt.decode(access_token, verify=False))
+            self.authorization = access_token
             self.access_token_fn = access_token_fn    
 
         self.content_type = 'application/json' #; charset=utf-8'
@@ -256,6 +259,9 @@ class HttpClient(object):
                     continue
 
             if response.status_code == 401 and not self.access_token_fn is None:
+                # if response.json()['error']['code'] == 'Invalid'
+                # map(lambda x: x, response.headers['WWW-Authenticate'].split(" "))
+
                 retry_count = retry_count - 1
                 if retry_count > 0:
                     self.authorization = self.access_token_fn()
