@@ -258,9 +258,8 @@ class HttpClient(object):
                     continue
 
             if response.status_code == 403:
-                decoded_token = jwt.decode(self.token, verify=False)
-                decoded_token_dict = dict(decoded_token)
-                raise RuntimeError("Request forbidden for user {}; token issuer: {}".format(decoded_token_dict['unique_name'], decoded_token_dict['iss']))
+                decoded_token = dict(jwt.decode(self.token, verify=False))
+                raise RuntimeError("Request {} forbidden for user {}; token issuer: {}".format(url, decoded_token['unique_name'], decoded_token['iss']))
 
             if response.status_code == 401 and not self.access_token_fn is None:
                 if response.json()['error']['code'] == 'InvalidAuthenticationTokenTenant':
