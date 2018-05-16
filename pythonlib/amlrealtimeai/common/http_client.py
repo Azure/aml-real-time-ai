@@ -8,7 +8,6 @@ import time
 import requests
 import logging
 
-from collections import namedtuple
 from requests import RequestException, ConnectionError, HTTPError
 
 # python 2 and python 3 compatibility library
@@ -45,8 +44,7 @@ class HttpClient(object):
         
         # --- Set common defaults: User-Agent, Content-Type, Accept ---
         if not access_token_fn is None:
-            access_token = access_token_fn()
-            self.authorization = access_token
+            self.authorization = access_token_fn()
             self.access_token_fn = access_token_fn    
 
         self.content_type = 'application/json' #; charset=utf-8'

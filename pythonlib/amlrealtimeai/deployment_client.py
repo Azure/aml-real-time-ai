@@ -410,15 +410,15 @@ def default_token_fn(authorization_uri_override = None):
         
     if authorization_uri_override is not None:
         authorization_uri = authorization_uri_override
+
+    split_pos = authorization_uri.rfind('/')
     
     options = {
+        "authuri": authorization_uri[:split_pos],
+        "tenant": authorization_uri[split_pos+1:],
         "clientid": "04b07795-8ddb-461a-bbee-02f9e1bf7b46",
         "resource": "https://management.core.windows.net/"
     }
-
-    split_pos = authorization_uri.rfind('/')
-    options['authuri'] = authorization_uri[:split_pos]
-    options['tenant'] = authorization_uri[split_pos+1:]
 
     auth = AADAuthentication(options, lambda m: print(m), store_refresh_token, load_refresh_token)
     token = auth.acquire_token()
