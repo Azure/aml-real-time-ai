@@ -18,8 +18,13 @@ from msrest.authentication import BasicTokenAuthentication
 
 _mgmnt_uri = "https://management.azure.com"
 
+_default_auth_uri = "https://login.microsoftonline.com"
+_default_tenant = "common"
+
 class DeploymentClient:
     def __init__(self, subscription_id, resource_group, account, service_principal_params = None):
+        self.__auth_uri = _default_auth_uri
+        self.__tenant = _default_tenant
         self.__subscription_id = subscription_id
         self.__resource_group = resource_group
         self.__account = account
@@ -28,7 +33,7 @@ class DeploymentClient:
                 service_principal_params.service_principal_id, 
                 service_principal_params.service_principal_key)
         else:
-            self.__get_access_token = default_token_fn     
+            self.__get_access_token = self.__acquire_access_token     
         self.__uri, self.__location = self.__discover_mms_endpoint(subscription_id, resource_group, account)
         self.__http_client = self._create_http_client(self.__uri)
         id = subscription_id + '_' + resource_group + '_' + account + '_' + self.__location
@@ -335,6 +340,24 @@ class DeploymentClient:
                 hash_md5.update(chunk)
         return hash_md5.hexdigest()
 
+    def __acquire_access_token(self, auth_uri_override = None, tenant_override = None):
+        if(auth_uri_override is not None):
+            self.__auth_uri = auth_uri_override
+        if(tenant_override is not None):
+            self.__tenant = tenant_override
+
+        options = {
+            "authuri": self.__auth_uri,
+            "tenant": self.__tenant,
+            "clientid": "04b07795-8ddb-461a-bbee-02f9e1bf7b46",
+            "resource": "https://management.core.windows.net/"
+        }
+
+        auth = AADAuthentication(options, lambda m: print(m), store_refresh_token, load_refresh_token)
+        token = auth.acquire_token()
+
+        return token
+
     def __discover_mms_endpoint(self, subscription_id, resource_group, account):
         http_client = self._create_http_client(_mgmnt_uri)
         endpoint_lookup_response = http_client.get('/subscriptions/' + subscription_id + '/resourcegroups/' + resource_group + '/providers/Microsoft.MachineLearningModelManagement/accounts/' + account + '?api-version=2017-09-01-preview').json()
@@ -400,19 +423,6 @@ def service_principal_token_fn(tenant, sp_id, sp_key):
         "resource": "https://management.core.windows.net/"
     })
     auth = AADAuthentication (opts, print)
-    token = auth.acquire_token()
-
-    return token
-
-def default_token_fn():
-    options = {
-        "authuri": "https://login.microsoftonline.com",
-        "tenant": "common",
-        "clientid": "04b07795-8ddb-461a-bbee-02f9e1bf7b46",
-        "resource": "https://management.core.windows.net/"
-    }
-
-    auth = AADAuthentication(options, lambda m: print(m), store_refresh_token, load_refresh_token)
     token = auth.acquire_token()
 
     return token

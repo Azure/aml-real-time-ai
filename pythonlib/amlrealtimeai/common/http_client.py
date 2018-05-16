@@ -2,6 +2,7 @@
 # Licensed under the MIT License.
 from __future__ import absolute_import
 
+import jwt
 import json as jsonFuncs
 import time
 import requests
@@ -194,6 +195,7 @@ class HttpClient(object):
         if headers is None:
             headers = {}
 
+        tenant_overridden = False
         retry_count = 5
         sleep_delay = 1
 
@@ -255,7 +257,20 @@ class HttpClient(object):
                     sleep_delay = sleep_delay * 2
                     continue
 
+            if response.status_code == 403:
+                decoded_token = dict(jwt.decode(self.token, verify=False))
+                raise RuntimeError("Request {} forbidden for user {}; token issuer: {}".format(url, decoded_token['unique_name'], decoded_token['iss']))
+
             if response.status_code == 401 and not self.access_token_fn is None:
+                if 'error' in response.json() and 'code' in response.json()['error'] and response.json()['error']['code'] == 'InvalidAuthenticationTokenTenant':
+                    if not tenant_overridden:
+                        tenant_overridden = True
+                        if 'WWW-Authenticate' in response.headers:
+                            auth_uri, tenant = self._parse_auth_header(response.headers['WWW-Authenticate'])
+                            if auth_uri is not None and tenant is not None:
+                                self.authorization = self.access_token_fn(auth_uri, tenant)
+                                continue
+
                 retry_count = retry_count - 1
                 if retry_count > 0:
                     self.authorization = self.access_token_fn()
@@ -273,6 +288,19 @@ class HttpClient(object):
                 pass
 
             return response
+
+    @staticmethod
+    def _parse_auth_header(header_value):
+        parsed_values = dict(map(lambda x: x.split('='), header_value.split(', ')))
+        if('Bearer authorization_uri' in parsed_values):
+            uri = parsed_values['Bearer authorization_uri']
+            if uri[0] == '"' and uri[len(uri)-1] == '"':
+                uri = uri[1:len(uri)-1]
+            sep = uri.rfind("/", len("https://"))
+            if sep > 0:
+                return uri[:sep], uri[sep+1:]
+        
+        return None, None
 
 
 class HttpException(Exception):

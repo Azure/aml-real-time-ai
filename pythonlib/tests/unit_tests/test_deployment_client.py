@@ -388,3 +388,21 @@ def test_print_model():
 def test_repr_model():
     model = Model(id="id", state="Success", name="new_model")
     assert r"Model({'id': 'id', 'state': 'Success', 'name': 'new_model'})" == model.__repr__()
+
+def test_parse_auth_header():
+    auth_header = 'Bearer authorization_uri="https://login.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47", error="invalid_token", error_description="The access token is from the wrong issuer. It must match the tenant associated with this subscription. Please use correct authority to get the token."'
+    auth_uri, tenant = HttpClient._parse_auth_header(auth_header)
+    assert auth_uri == "https://login.windows.net"
+    assert tenant == "72f988bf-86f1-41af-91ab-2d7cd011db47"
+
+def test_parse_auth_header_invalid_uri():
+    auth_header = 'Bearer authorization_uri="https://login.windows.net72f988bf-86f1-41af-91ab-2d7cd011db47"'
+    auth_uri, tenant = HttpClient._parse_auth_header(auth_header)
+    assert auth_uri is None
+    assert tenant is None
+
+def test_parse_auth_header_missing_value():
+    auth_header = 'Bearer error="invalid_token", error_description="The access token is from the wrong issuer. It must match the tenant associated with this subscription. Please use correct authority to get the token."'
+    auth_uri, tenant = HttpClient._parse_auth_header(auth_header)
+    assert auth_uri is None
+    assert tenant is None
