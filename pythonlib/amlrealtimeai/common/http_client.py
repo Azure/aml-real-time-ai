@@ -46,7 +46,6 @@ class HttpClient(object):
         # --- Set common defaults: User-Agent, Content-Type, Accept ---
         if not access_token_fn is None:
             access_token = access_token_fn()
-            print(jwt.decode(access_token, verify=False))
             self.authorization = access_token
             self.access_token_fn = access_token_fn    
 
@@ -198,6 +197,7 @@ class HttpClient(object):
         if headers is None:
             headers = {}
 
+        tenant_overridden = False
         retry_count = 5
         sleep_delay = 1
 
@@ -259,18 +259,24 @@ class HttpClient(object):
                     sleep_delay = sleep_delay * 2
                     continue
 
-            if response.status_code == 401 and not self.access_token_fn is None:
-                authorization_uri_override = None
+            if response.status_code == 403:
+                decoded_token = jwt.decode(self.token, verify=False)
+                decoded_token_dict = dict(decoded_token)
+                raise RuntimeError("Request forbidden for user {}; token issuer: {}".format(decoded_token_dict['unique_name'], decoded_token_dict['iss']))
 
+            if response.status_code == 401 and not self.access_token_fn is None:
                 if response.json()['error']['code'] == 'InvalidAuthenticationTokenTenant':
-                    parsed_headers = dict(map(lambda x: x.split('='), response.headers['WWW-Authenticate'].split(', ')))
-                    if('Bearer authorization_uri' in parsed_headers):
-                        uri = parsed_headers['Bearer authorization_uri']
-                        authorization_uri_override = uri[1:len(uri)-1]
+                    if not tenant_overridden:
+                        tenant_overridden = True
+                        parsed_headers = dict(map(lambda x: x.split('='), response.headers['WWW-Authenticate'].split(', ')))
+                        if('Bearer authorization_uri' in parsed_headers):
+                            uri = parsed_headers['Bearer authorization_uri']
+                            self.authorization = self.access_token_fn(uri[1:len(uri)-1])
+                            continue
 
                 retry_count = retry_count - 1
                 if retry_count > 0:
-                    self.authorization = self.access_token_fn(authorization_uri_override)
+                    self.authorization = self.access_token_fn()
                     continue
 
             try:

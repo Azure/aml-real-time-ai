@@ -382,7 +382,7 @@ class AsyncOperationFailedException(Exception):
 
 # Keep copy of refresh token in global memory for the entire process
 refresh_token = None
-authorization_uri = None
+authorization_uri = "https://login.microsoftonline.com/common"
 
 def store_refresh_token(new_token):
     global refresh_token
@@ -416,13 +416,9 @@ def default_token_fn(authorization_uri_override = None):
         "resource": "https://management.core.windows.net/"
     }
 
-    if authorization_uri is not None:
-        split_pos = authorization_uri.rfind('/')
-        options['authuri'] = authorization_uri[:split_pos]
-        options['tenant'] = authorization_uri[split_pos+1:]
-    else:
-        options['authuri'] = "https://login.microsoftonline.com"
-        options['tenant'] = "common"
+    split_pos = authorization_uri.rfind('/')
+    options['authuri'] = authorization_uri[:split_pos]
+    options['tenant'] = authorization_uri[split_pos+1:]
 
     auth = AADAuthentication(options, lambda m: print(m), store_refresh_token, load_refresh_token)
     token = auth.acquire_token()
