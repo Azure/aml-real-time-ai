@@ -28,9 +28,7 @@ class AADAuthentication(object):
         resource = opts['resource']
         clientid = opts['clientid']
 
-        authorization_uri = opts['authorization_uri'] if 'authorization_uri' in opts else authuri + '/' + tenant
-
-        ctx = adal.AuthenticationContext(authorization_uri, api_version=None)
+        ctx = adal.AuthenticationContext(authuri + '/' + tenant, api_version=None)
 
         try:
             if self.__load_refresh_token_fn is not None:
