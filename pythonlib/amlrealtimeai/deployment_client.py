@@ -405,7 +405,7 @@ def service_principal_token_fn(tenant, sp_id, sp_key):
 
     return token
 
-def default_token_fn():
+def default_token_fn(authorization_uri_override = None):
     global authorization_uri
         
     if authorization_uri_override is not None:
@@ -417,7 +417,9 @@ def default_token_fn():
     }
 
     if authorization_uri is not None:
-        options['authorization_uri'] = authorization_uri
+        split_pos = authorization_uri.rfind('/')
+        options['authuri'] = authorization_uri[:split_pos]
+        options['tenant'] = authorization_uri[split_pos+1:]
     else:
         options['authuri'] = "https://login.microsoftonline.com"
         options['tenant'] = "common"

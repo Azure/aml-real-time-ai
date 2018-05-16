@@ -263,9 +263,10 @@ class HttpClient(object):
                 authorization_uri_override = None
 
                 if response.json()['error']['code'] == 'InvalidAuthenticationTokenTenant':
-                    parsed_headers = dict(lambda x: namedtuple(x.split('=')[0], x.split('=')[1]), response.headers['WWW-Authenticate'].split(" "))
-                    if 'authorization_uri' in parsed_headers:
-                        authorization_uri_override = parsed_headers['authorization_uri']
+                    parsed_headers = dict(map(lambda x: x.split('='), response.headers['WWW-Authenticate'].split(', ')))
+                    if('Bearer authorization_uri' in parsed_headers):
+                        uri = parsed_headers['Bearer authorization_uri']
+                        authorization_uri_override = uri[1:len(uri)-1]
 
                 retry_count = retry_count - 1
                 if retry_count > 0:
