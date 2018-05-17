@@ -8,8 +8,8 @@ import json
 from nbconvert.preprocessors import ExecutePreprocessor
 from tests.integration_tests.test_utils import get_service_principal, get_test_config, download_kaggle_test_data
 
-# def test_quickstart_notebook():
-#     run_notebook('notebooks/resnet50/00_QuickStart.ipynb')
+def test_quickstart_notebook():
+    run_notebook('notebooks/resnet50/00_QuickStart.ipynb')
 
 def test_modelbuild_notebook():
     download_kaggle_test_data()
