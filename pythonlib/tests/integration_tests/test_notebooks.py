@@ -9,8 +9,7 @@ from nbconvert.preprocessors import ExecutePreprocessor
 from tests.integration_tests.test_utils import get_service_principal, get_test_config
 
 def test_quickstart_notebook():
-    os.chdir(os.path.join(os.getcwd(), 'notebooks/resnet50'))
-    file = os.path.join(os.getcwd(), '00_QuickStart.ipynb')
+    file = os.path.join(os.getcwd(), 'notebooks/resnet50/00_QuickStart.ipynb')
     lines = None
     with open(file) as f:
         lines = f.read()
@@ -19,7 +18,7 @@ def test_quickstart_notebook():
     lines = replace_auth_values(lines)
     nb = nbformat.reads(lines, as_version=4)
     ep = ExecutePreprocessor(timeout=1800, kernel_name='python3')
-    out = ep.preprocess(nb, {'metadata': {'path': 'notebooks/'}})
+    out = ep.preprocess(nb, {'metadata': {'path': 'notebooks/resnet50'}})
     print(out)
 
 def replace_auth_values(str):
