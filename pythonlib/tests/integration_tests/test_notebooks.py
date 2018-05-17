@@ -9,7 +9,8 @@ from nbconvert.preprocessors import ExecutePreprocessor
 from tests.integration_tests.test_utils import get_service_principal, get_test_config
 
 def test_quickstart_notebook():
-    file = os.path.join(os.getcwd(), 'notebooks/resnet50/00_QuickStart.ipynb')
+    os.chdir(os.path.join(os.getcwd(), 'notebooks/resnet50'))
+    file = os.path.join(os.getcwd(), '00_QuickStart.ipynb')
     lines = None
     with open(file) as f:
         lines = f.read()
