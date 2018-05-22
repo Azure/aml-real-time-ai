@@ -2,8 +2,11 @@
 # Licensed under the MIT License
 import os
 import json
-from collections import namedtuple
+import glob
+import requests
+import zipfile
 
+from collections import namedtuple
 from datetime import datetime, timezone
 from dateutil.parser import parse
 
@@ -43,3 +46,20 @@ def get_service_principal():
         raise Exception("Tenant not found")
     Aad_Record = namedtuple("AadRecord", ['tenant','service_principal_id', 'service_principal_key'])
     return Aad_Record(tenant, sp_id, sp_key)
+
+def download_kaggle_test_data():
+    datadir = os.path.expanduser('~/catsanddogs')
+    cat_files = glob.glob(os.path.join(datadir, 'PetImages', 'Cat', '*.jpg'))
+    dog_files = glob.glob(os.path.join(datadir, 'PetImages', 'Dog', '*.jpg'))
+
+    if(not len(cat_files) or not len(dog_files)):
+        os.makedirs(datadir)
+        uri = os.getenv('TEST_KAGGLE_DATA_URI')
+        r = requests.get(uri)
+        zip_path = os.path.join(datadir, 'data.zip')
+        with open(zip_path,'wb') as output:
+            output.write(r.content)
+        zip_ref = zipfile.ZipFile(zip_path, 'r')
+        zip_ref.extractall(datadir)
+        zip_ref.close()
+        os.remove(zip_path)
