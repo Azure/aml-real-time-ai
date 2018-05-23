@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 using CSharpClient;
 using Grpc.Core;
 using Newtonsoft.Json;
@@ -16,6 +17,11 @@ namespace resnet
         private static readonly string errorMessage = "" + Environment.NewLine + "dotnet resnet.dll [url(without port)] [path/to/local/image] <use_ssl (true/false - false if absent)> <auth_key (use_ssl must be true)>";
 
         private static int Main(string[] args)
+        {
+            return MainAsync(args).Result;
+        }
+
+        private static async Task<int> MainAsync(string[] args)
         {
             if (args.Length < 2)
             {
@@ -42,12 +48,12 @@ namespace resnet
                 Console.WriteLine(!string.IsNullOrEmpty(auth) ? "Using auth" : "Not using auth");
             }
 
-            var client = new ScoringClient(host, useSSL?443:80, useSSL, auth);
+            var client = new ScoringClient(host, useSSL ? 443 : 80, useSSL, auth);
 
             using (var content = File.OpenRead(image))
             {
                 IScoringRequest request = new ImageRequest(content);
-                var result = client.Score<float[,]>(request);
+                var result = await client.ScoreAsync<float[,]>(request);
                 for (int i = 0; i < result.GetLength(0); i++)
                 {
                     Console.WriteLine($"Batch {i}:");

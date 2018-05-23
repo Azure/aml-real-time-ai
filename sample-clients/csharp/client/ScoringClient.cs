@@ -1,5 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
+using System;
 using System.Threading.Tasks;
 using Grpc.Core;
 using Tensorflow.Serving;
@@ -26,8 +28,7 @@ namespace CSharpClient
             if (authKey != null && useSsl)
             {
                 creds = ChannelCredentials.Create(baseCreds, CallCredentials.FromInterceptor(
-                      async (context, metadata) =>
-                      {
+                      async (context, metadata) => {
                           metadata.Add(new Metadata.Entry("authorization", authKey));
                           await Task.CompletedTask;
                       }));
@@ -47,20 +48,46 @@ namespace CSharpClient
 
         public async Task<T> ScoreAsync<T>(IScoringRequest request) where T : class
         {
-            var result = await _client.PredictAsync(request.MakePredictRequest());
-            return result.Outputs["output_alias"].Convert<T>();
+            var predictRequest = request.MakePredictRequest();
+
+            return await RetryAsync(async () => {
+                var result = await _client.PredictAsync(predictRequest);
+                return result.Outputs["output_alias"].Convert<T>();
+            });
         }
 
-        public float[] Score(IScoringRequest request)
+        private static async Task<T> RetryAsync<T>(
+            Func<Task<T>> operation, int retryCount = 20,
+            int initialDelayInMs = 500, int maxDelayInMs = 10000)
         {
-            return Score<float[]>(request);
+            var delay = initialDelayInMs;
+
+            while (true)
+            {
+                try
+                {
+                    return await operation();
+                }
+                catch (RpcException rpcException)
+                {
+                    if (!IsTransient(rpcException) || --retryCount <= 0)
+                    {
+                        throw;
+                    }
+
+                    await Task.Delay(Math.Min(delay, maxDelayInMs));
+                    delay *= 2;
+                }
+            }
         }
 
-        public T Score<T>(IScoringRequest request) where T : class
+        private static bool IsTransient(RpcException rpcException)
         {
-            var requestGrpc = request.MakePredictRequest();
-            var result = _client.Predict(requestGrpc);
-            return result.Outputs["output_alias"].Convert<T>();
+            return
+                rpcException.Status.StatusCode == StatusCode.DeadlineExceeded ||
+                rpcException.Status.StatusCode == StatusCode.Unavailable ||
+                rpcException.Status.StatusCode == StatusCode.Aborted ||
+                rpcException.Status.StatusCode == StatusCode.Internal;
         }
     }
 }
