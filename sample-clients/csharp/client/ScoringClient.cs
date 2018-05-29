@@ -75,8 +75,8 @@ namespace CSharpClient
                         throw;
                     }
 
-                    await Task.Delay(Math.Min(delay, maxDelayInMs));
-                    delay *= 2;
+                    await Task.Delay(delay);
+                    delay = Math.Min(2 * delay, maxDelayInMs)
                 }
             }
         }
