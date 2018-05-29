@@ -15,6 +15,9 @@ def _preprocess_tensor(tensor):
     dims_expander = tf.expand_dims(float_caster, 0)
     # resizer = tf.image.resize_images(dims_expander, [224, 224], method=tf.image.ResizeMethod.NEAREST_NEIGHBOR)
 
+    output_width = 224
+    output_height = 224
+
     resize_side = tf.random_uniform([], minval=256, maxval=513, dtype=tf.int32)
 
     image = _aspect_preserving_resize(dims_expander, resize_side)
@@ -75,7 +78,7 @@ def _central_crop(image, crop_height, crop_width):
     offset_height = (image_height - crop_height) / 2
     offset_width = (image_width - crop_width) / 2
 
-    return _crop(image, offset_height, offset_width, crop_height, crop_width))
+    return _crop(image, offset_height, offset_width, crop_height, crop_width)
   
 def _crop(image, offset_height, offset_width, crop_height, crop_width):
     """Crops the given image using the provided offsets and sizes.
@@ -103,7 +106,7 @@ def _crop(image, offset_height, offset_width, crop_height, crop_width):
       tf.equal(tf.rank(image), 3),
       ['Rank of image must be equal to 3.'])
     with tf.control_dependencies([rank_assertion]):
-    cropped_shape = tf.stack([crop_height, crop_width, original_shape[2]])
+        cropped_shape = tf.stack([crop_height, crop_width, original_shape[2]])
 
     size_assertion = tf.Assert(
       tf.logical_and(
@@ -116,5 +119,6 @@ def _crop(image, offset_height, offset_width, crop_height, crop_width):
     # Use tf.slice instead of crop_to_bounding box as it accepts tensors to
     # define the crop size.
     with tf.control_dependencies([size_assertion]):
-    image = tf.slice(image, offsets, cropped_shape)
+        image = tf.slice(image, offsets, cropped_shape)
+
     return tf.reshape(image, cropped_shape)
