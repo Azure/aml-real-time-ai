@@ -118,3 +118,32 @@ def _crop(image, offset_height, offset_width, crop_height, crop_width):
     with tf.control_dependencies([size_assertion]):
     image = tf.slice(image, offsets, cropped_shape)
     return tf.reshape(image, cropped_shape)
+    
+def _smallest_size_at_least(height, width, smallest_side):
+    """Computes new shape with the smallest side equal to `smallest_side`.
+
+    Computes new shape with the smallest side equal to `smallest_side` while
+    preserving the original aspect ratio.
+
+    Args:
+    height: an int32 scalar tensor indicating the current height.
+    width: an int32 scalar tensor indicating the current width.
+    smallest_side: A python integer or scalar `Tensor` indicating the size of
+      the smallest side after resize.
+
+    Returns:
+    new_height: an int32 scalar tensor indicating the new height.
+    new_width: and int32 scalar tensor indicating the new width.
+    """
+    smallest_side = tf.convert_to_tensor(smallest_side, dtype=tf.int32)
+
+    height = tf.to_float(height)
+    width = tf.to_float(width)
+    smallest_side = tf.to_float(smallest_side)
+
+    scale = tf.cond(tf.greater(height, width),
+                  lambda: smallest_side / width,
+                  lambda: smallest_side / height)
+    new_height = tf.to_int32(height * scale)
+    new_width = tf.to_int32(width * scale)
+    return new_height, new_width
