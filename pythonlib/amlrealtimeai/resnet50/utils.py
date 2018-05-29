@@ -10,20 +10,18 @@ def _decode(tensor):
 
     
 def _preprocess_tensor(tensor):
-    jpeg_decoded = tf.image.decode_png(tensor, 3)
-    float_caster = tf.cast(jpeg_decoded, dtype=tf.float32)
-    dims_expander = tf.expand_dims(float_caster, 0)
-    # resizer = tf.image.resize_images(dims_expander, [224, 224], method=tf.image.ResizeMethod.NEAREST_NEIGHBOR)
+    image = tf.image.decode_png(tensor, 3)
+    image = tf.cast(image, dtype=tf.float32)
 
     output_width = 224
     output_height = 224
+    resize_min = 256
 
-    resize_side = tf.random_uniform([], minval=256, maxval=513, dtype=tf.int32)
-
-    image = _aspect_preserving_resize(dims_expander, resize_side)
+    image = _aspect_preserving_resize(image, resize_min)
     image = _central_crop(image, output_height, output_width)
     image.set_shape([output_height, output_width, 3])
     image = tf.to_float(image)
+    image = tf.expand_dims(image, 0)
 
     slice_red = tf.slice(image, [0, 0, 0, 0], [1, 224, 224, 1])
     slice_green = tf.slice(image, [0, 0, 0, 1], [1, 224, 224, 1])
