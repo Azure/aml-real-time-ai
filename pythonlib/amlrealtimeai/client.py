@@ -42,6 +42,7 @@ class PredictionClient:
 
         self.__channel_shutdown_timeout = channel_shutdown_timeout
         self.__channel_usable_until = None
+        self.__channel = None
 
 
     def score_numpy_array(self, npdata):
@@ -83,6 +84,8 @@ class PredictionClient:
         if(self.__channel_usable_until is None or self.__channel_usable_until < self._get_datetime_now()):
             self.__stub = None
             # Shutdown old channel
+            if self.__channel is not None:
+                self.__channel.close()
             self.__channel = self._channel_func()
             self.__stub = prediction_service_pb2_grpc.PredictionServiceStub(self.__channel)
         self.__channel_usable_until = self._get_datetime_now() + self.__channel_shutdown_timeout
@@ -103,3 +106,5 @@ class PredictionClient:
                 time.sleep(sleep_delay)
                 sleep_delay = sleep_delay * 2
                 print("Retrying", rpcError)
+                # invalidate channel before retrying
+                self.__channel_usable_until = None
