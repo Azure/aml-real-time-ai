@@ -14,8 +14,6 @@ from amlrealtimeai import deployment_client
 
 def cleanup_old_test_services(client):
     for service in client.list_services():
-        if(not service.name.startswith('int-test-')):
-            continue
         service = client.get_service_by_id(service.id)
         offset = datetime.now(timezone.utc) - parse(service.createdAt)
         if(offset.seconds > 3600):
