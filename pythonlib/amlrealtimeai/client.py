@@ -82,12 +82,7 @@ class PredictionClient:
 
     def _get_grpc_stub(self):
         if(self.__channel_usable_until is None or self.__channel_usable_until < self._get_datetime_now()):
-            self.__stub = None
-            # Shutdown old channel
-            if self.__channel is not None:
-                self.__channel.close()
-            self.__channel = self._channel_func()
-            self.__stub = prediction_service_pb2_grpc.PredictionServiceStub(self.__channel)
+            self.__reinitialize_channel()
         self.__channel_usable_until = self._get_datetime_now() + self.__channel_shutdown_timeout
         return self.__stub
 
@@ -106,5 +101,11 @@ class PredictionClient:
                 time.sleep(sleep_delay)
                 sleep_delay = sleep_delay * 2
                 print("Retrying", rpcError)
-                # invalidate channel before retrying
-                self.__channel_usable_until = None
+                self.__reinitialize_channel()
+
+    def __reinitialize_channel(self):
+        self.__stub = None
+        if self.__channel is not None:
+            self.__channel.close()
+        self.__channel = self._channel_func()
+        self.__stub = prediction_service_pb2_grpc.PredictionServiceStub(self.__channel)
