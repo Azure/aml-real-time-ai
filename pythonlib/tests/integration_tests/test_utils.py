@@ -13,19 +13,24 @@ from dateutil.parser import parse
 from amlrealtimeai import deployment_client
 
 def cleanup_old_test_services(client):
+    msg = "SVC: "
+
     for service in client.list_services():
+        msg = msg + service.name + "; "
         print(service.name)
 
-        if(not service.name.startswith('int-test-')):
-            continue
-        service = client.get_service_by_id(service.id)
-        offset = datetime.now(timezone.utc) - parse(service.createdAt)
-        if(offset.seconds > 3600):
-            try:
-                client.delete_service(service.id)
-                client.delete_model(service.model_id)
-            except:
-                pass
+        # if(not service.name.startswith('int-test-')):
+        #     continue
+        # service = client.get_service_by_id(service.id)
+        # offset = datetime.now(timezone.utc) - parse(service.createdAt)
+        # if(offset.seconds > 3600):
+        #     try:
+        #         client.delete_service(service.id)
+        #         client.delete_model(service.model_id)
+        #     except:
+        #         pass
+
+    raise ValueError(msg)
 
 def get_test_config():
     result = {'test_subscription_id': os.getenv('TEST_SUBSCRIPTION_ID'),
