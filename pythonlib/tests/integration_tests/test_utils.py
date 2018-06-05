@@ -16,8 +16,9 @@ def cleanup_old_test_services(client):
     msg = "SVC: "
 
     for service in client.list_services():
-        msg = msg + service.name + "; "
-        print(service.name)
+        service = client.get_service_by_id(service.id)
+        msg = msg + service.name + " [" + service.createdAt + "]; "
+        # print(service.name)
 
         # if(not service.name.startswith('int-test-')):
         #     continue
