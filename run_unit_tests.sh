@@ -1,6 +1,6 @@
 #!/bin/bash
 
-dotnet test --project sample-clients/csharp/client.tests
+dotnet test sample-clients/csharp/client.tests
 ERR=$?
 if [ $ERR -ne 0 ]
 then
