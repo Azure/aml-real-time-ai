@@ -2,8 +2,7 @@
 
 dotnet test --project sample-clients/csharp/client.tests
 ERR=$?
-
-if [ $? -ne 0 ]
+if [ $ERR -ne 0 ]
 then
     exit $ERR
 fi
