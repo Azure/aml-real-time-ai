@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27130.2027
+VisualStudioVersion = 15.0.27130.2026
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "tfserving", "protos\tfserving.csproj", "{DBAE814C-26E8-4CFE-9BAF-CE605CA8B02F}"
 EndProject
@@ -12,6 +12,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "resnet", "resnet\resnet.csp
 		{DBAE814C-26E8-4CFE-9BAF-CE605CA8B02F} = {DBAE814C-26E8-4CFE-9BAF-CE605CA8B02F}
 		{9369A5F6-FE4A-4116-9558-6B8D2A09C7EB} = {9369A5F6-FE4A-4116-9558-6B8D2A09C7EB}
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpClient.Tests", "client.tests\CSharpClient.Tests.csproj", "{867D4433-A7BC-482B-ADAE-08DBF7205703}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -31,6 +33,10 @@ Global
 		{47F112D5-8D41-4E7E-9BF0-E6B8C18FBFB3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{47F112D5-8D41-4E7E-9BF0-E6B8C18FBFB3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{47F112D5-8D41-4E7E-9BF0-E6B8C18FBFB3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{867D4433-A7BC-482B-ADAE-08DBF7205703}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{867D4433-A7BC-482B-ADAE-08DBF7205703}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{867D4433-A7BC-482B-ADAE-08DBF7205703}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{867D4433-A7BC-482B-ADAE-08DBF7205703}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

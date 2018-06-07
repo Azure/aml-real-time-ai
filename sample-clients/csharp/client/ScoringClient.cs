@@ -10,14 +10,14 @@ namespace CSharpClient
 {
     public class ScoringClient
     {
-        private readonly PredictionService.PredictionServiceClient _client;
+        private readonly IPredictionServiceClient _client;
 
-        public ScoringClient(PredictionService.PredictionServiceClient client)
+        public ScoringClient(IPredictionServiceClient client)
         {
             _client = client;
         }
 
-        public ScoringClient(Channel channel) : this(new PredictionService.PredictionServiceClient(channel))
+        public ScoringClient(Channel channel) : this(new PredictionServiceClientWrapper(new PredictionService.PredictionServiceClient(channel)))
         {
         }
 
@@ -38,7 +38,7 @@ namespace CSharpClient
                 creds = baseCreds;
             }
             var channel = new Channel(host, port, creds);
-            _client = new PredictionService.PredictionServiceClient(channel);
+            _client = new PredictionServiceClientWrapper(new PredictionService.PredictionServiceClient(channel));
         }
 
         public async Task<float[]> ScoreAsync(IScoringRequest request)
@@ -76,7 +76,7 @@ namespace CSharpClient
                     }
 
                     await Task.Delay(delay);
-                    delay = Math.Min(2 * delay, maxDelayInMs)
+                    delay = Math.Min(2 * delay, maxDelayInMs);
                 }
             }
         }
