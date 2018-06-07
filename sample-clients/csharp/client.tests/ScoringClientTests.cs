@@ -11,13 +11,6 @@ namespace CSharpClient.Tests
 {
     public class ScoringClientTests
     {
-		[Fact]
-        public async Task Broken_test()
-        {
-            throw new Exception("BROKEN");
-            
-        }
-
         [Fact]
         public async Task Invokes_predict_async_call()
         {
