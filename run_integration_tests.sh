@@ -2,7 +2,7 @@
 
 conda env create -f environment.yml
 source /etc/conda/bin/activate amlrealtimeai
-conda install pytest
+conda install -y pytest
 export TEST_SERVICE_PRINCIPAL_KEY=$1
 pytest pythonlib/tests/integration_tests
 ERR=$?
