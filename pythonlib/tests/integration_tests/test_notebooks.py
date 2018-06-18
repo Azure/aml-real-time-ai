@@ -42,10 +42,10 @@ def replace_auth_values(str):
 
     str = str.replace(
         'service_name = \\"quickstart-service\\"', 
-        'import uuid\\nservice_name = (\\"int-test-qs-svc-\\" + str(uuid.uuid4()))[:30]')
+        'import uuid\\nservice_name = (\\"int-test-qs-svc-\\" + str(uuid.uuid4()))[:21]')
 
     str = str.replace(
         'service_name = \\"modelbuild-service\\"', 
-        'import uuid\\nservice_name = (\\"int-test-mb-svc-\\" + str(uuid.uuid4()))[:30]')
+        'import uuid\\nservice_name = (\\"int-test-mb-svc-\\" + str(uuid.uuid4()))[:21]')
 
     return str
