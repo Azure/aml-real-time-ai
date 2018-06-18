@@ -25,22 +25,6 @@ def read_file():
     return None
     
 def test_remote_featurizer_local_usage():
-
-
-
-
-
-
-    if True:
-        return
-
-
-
-
-
-
-
-
     test_config = get_test_config()
 
     in_images = tf.placeholder(tf.string)
@@ -78,13 +62,6 @@ def test_remote_featurizer_local_usage():
 
 
 def test_remote_featurizer_create_package_and_service():
-
-
-
-    if True:
-        return
-
-
     test_config = get_test_config()
 
     deployment_client = DeploymentClient(test_config['test_subscription_id'], test_config['test_resource_group'],
