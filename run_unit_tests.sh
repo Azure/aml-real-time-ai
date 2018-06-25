@@ -10,8 +10,8 @@ fi
 
 conda env create -f environment.yml
 source /etc/conda/bin/activate amlrealtimeai
-conda install -y pytest
-pytest pythonlib/tests/unit_tests
+conda install -y pytest pytest-cov
+pytest --cov=pythonlib/amlrealtimeai pythonlib/tests/unit_tests
 ERR=$?
 source /etc/conda/bin/activate base
 conda env remove -y -n amlrealtimeai
