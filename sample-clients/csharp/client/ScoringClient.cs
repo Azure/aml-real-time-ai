@@ -10,6 +10,8 @@ namespace CSharpClient
 {
     public class ScoringClient
     {
+        private const int RetryCount = 10;
+
         private readonly IPredictionServiceClient _client;
 
         public ScoringClient(IPredictionServiceClient client)
@@ -42,12 +44,12 @@ namespace CSharpClient
             _client = new PredictionServiceClientWrapper(new PredictionService.PredictionServiceClient(channel));
         }
 
-        public async Task<float[]> ScoreAsync(IScoringRequest request, int retryCount = 20)
+        public async Task<float[]> ScoreAsync(IScoringRequest request, int retryCount = RetryCount)
         {
             return await ScoreAsync<float[]>(request, retryCount);
         }
 
-        public async Task<T> ScoreAsync<T>(IScoringRequest request, int retryCount = 20) where T : class
+        public async Task<T> ScoreAsync<T>(IScoringRequest request, int retryCount = RetryCount) where T : class
         {
             var predictRequest = request.MakePredictRequest();
 
@@ -58,12 +60,10 @@ namespace CSharpClient
             }, retryCount);
         }
 
-        private static async Task<T> RetryAsync<T>(
-            Func<Task<T>> operation, int retryCount = 20,
-            int initialDelayInMs = 500, int maxDelayInMs = 10000)
+        private async Task<T> RetryAsync<T>(
+            Func<Task<T>> operation, int retryCount = RetryCount
+            )
         {
-            var delay = initialDelayInMs;
-
             while (true)
             {
                 try
@@ -76,9 +76,6 @@ namespace CSharpClient
                     {
                         throw;
                     }
-
-                    await Task.Delay(delay);
-                    delay = Math.Min(2 * delay, maxDelayInMs);
                 }
             }
         }

@@ -92,9 +92,9 @@ namespace CSharpClient.Tests
         }
 
         [Theory]
-        [InlineData(StatusCode.DeadlineExceeded, 2)]
-        [InlineData(StatusCode.Unavailable, 2)]
-        [InlineData(StatusCode.Aborted, 2)]
+        [InlineData(StatusCode.DeadlineExceeded, 3)]
+        [InlineData(StatusCode.Unavailable, 1)]
+        [InlineData(StatusCode.Aborted, 4)]
         [InlineData(StatusCode.Internal, 2)]
         public async Task Retries_transient_exceptions_until_retries_exhausted(StatusCode transientStatusCode, int retryCount)
         {
@@ -124,7 +124,7 @@ namespace CSharpClient.Tests
 
             Assert.Equal(exception, resultException);
 
-            scoringRequestMock.Verify(x => x.MakePredictRequest(), Times.Exactly(retryCount - 1));
+            scoringRequestMock.Verify(x => x.MakePredictRequest(), Times.Exactly(1));
             predictionServiceClientMock.Verify(x => x.PredictAsync(predictRequest), Times.Exactly(retryCount));
         }
 
