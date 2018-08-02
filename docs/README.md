@@ -23,7 +23,7 @@ Set up your machine.
 1. Launch the Jupyter notebook browser:
 
    `jupyter notebook` 
-1. In the browser, open this notebook by navigating to examples/resnet50/00_QuickStart.ipynb.  (If you're using Chrome, copy and paste the URL with the notebook token into the address bar).
+1. In the browser, open this notebook by navigating to notebooks/resnet50/00_QuickStart.ipynb.  (If you're using Chrome, copy and paste the URL with the notebook token into the address bar).
 
  ## Create Azure ML Model Management Account
 1. Go to the Model Management Account (MMA) creation page in the [Azure Portal](https://aka.ms/aml-create-mma)
