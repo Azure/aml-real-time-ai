@@ -28,7 +28,8 @@ namespace CSharpClient
             if (authKey != null && useSsl)
             {
                 creds = ChannelCredentials.Create(baseCreds, CallCredentials.FromInterceptor(
-                      async (context, metadata) => {
+                      async (context, metadata) =>
+                      {
                           metadata.Add(new Metadata.Entry("authorization", authKey));
                           await Task.CompletedTask;
                       }));
@@ -41,19 +42,20 @@ namespace CSharpClient
             _client = new PredictionServiceClientWrapper(new PredictionService.PredictionServiceClient(channel));
         }
 
-        public async Task<float[]> ScoreAsync(IScoringRequest request)
+        public async Task<float[]> ScoreAsync(IScoringRequest request, int retryCount = 20)
         {
-            return await ScoreAsync<float[]>(request);
+            return await ScoreAsync<float[]>(request, retryCount);
         }
 
-        public async Task<T> ScoreAsync<T>(IScoringRequest request) where T : class
+        public async Task<T> ScoreAsync<T>(IScoringRequest request, int retryCount = 20) where T : class
         {
             var predictRequest = request.MakePredictRequest();
 
-            return await RetryAsync(async () => {
+            return await RetryAsync(async () =>
+            {
                 var result = await _client.PredictAsync(predictRequest);
                 return result.Outputs["output_alias"].Convert<T>();
-            });
+            }, retryCount);
         }
 
         private static async Task<T> RetryAsync<T>(

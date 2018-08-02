@@ -65,7 +65,8 @@ namespace CSharpClient.Tests
             predictResponse.Outputs.Add("output_alias", outputTensorProto);
 
             var predictionServiceClientMock = new Mock<IPredictionServiceClient>();
-            predictionServiceClientMock.Setup(x => x.PredictAsync(predictRequest)).Returns(async () => {
+            predictionServiceClientMock.Setup(x => x.PredictAsync(predictRequest)).Returns(async () =>
+            {
                 await Task.CompletedTask;
 
                 if (exception != null)
@@ -88,6 +89,43 @@ namespace CSharpClient.Tests
 
             scoringRequestMock.Verify(x => x.MakePredictRequest(), Times.Exactly(1));
             predictionServiceClientMock.Verify(x => x.PredictAsync(predictRequest), Times.Exactly(2));
+        }
+
+        [Theory]
+        [InlineData(StatusCode.DeadlineExceeded, 2)]
+        [InlineData(StatusCode.Unavailable, 2)]
+        [InlineData(StatusCode.Aborted, 2)]
+        [InlineData(StatusCode.Internal, 2)]
+        public async Task Retries_transient_exceptions_until_retries_exhausted(StatusCode transientStatusCode, int retryCount)
+        {
+            var exception = new RpcException(new Status(transientStatusCode, string.Empty));
+
+            var expectedResultValues = new[] { 1f, 2f, 3f };
+
+            var outputTensorProto = new TensorProto { Dtype = DataType.DtFloat };
+            outputTensorProto.FloatVal.Add(expectedResultValues);
+
+            outputTensorProto.TensorShape = new TensorShapeProto();
+            outputTensorProto.TensorShape.Dim.Add(new TensorShapeProto.Types.Dim());
+            outputTensorProto.TensorShape.Dim[0].Size = 3;
+
+            var predictRequest = new PredictRequest();
+            var predictResponse = new PredictResponse();
+            predictResponse.Outputs.Add("output_alias", outputTensorProto);
+
+            var predictionServiceClientMock = new Mock<IPredictionServiceClient>();
+            predictionServiceClientMock.Setup(x => x.PredictAsync(predictRequest)).ThrowsAsync(exception).Verifiable();
+
+            var scoringRequestMock = new Mock<IScoringRequest>();
+            scoringRequestMock.Setup(x => x.MakePredictRequest()).Returns(() => predictRequest);
+
+            var scoringClient = new ScoringClient(predictionServiceClientMock.Object);
+            var resultException = await Assert.ThrowsAsync<RpcException>(() => scoringClient.ScoreAsync(scoringRequestMock.Object, retryCount));
+
+            Assert.Equal(exception, resultException);
+
+            scoringRequestMock.Verify(x => x.MakePredictRequest(), Times.Exactly(retryCount - 1));
+            predictionServiceClientMock.Verify(x => x.PredictAsync(predictRequest), Times.Exactly(retryCount));
         }
 
         public static IEnumerable<object[]> NonTransientExceptions =>
@@ -115,7 +153,8 @@ namespace CSharpClient.Tests
             predictResponse.Outputs.Add("output_alias", outputTensorProto);
 
             var predictionServiceClientMock = new Mock<IPredictionServiceClient>();
-            predictionServiceClientMock.Setup(x => x.PredictAsync(predictRequest)).Returns(async () => {
+            predictionServiceClientMock.Setup(x => x.PredictAsync(predictRequest)).Returns(async () =>
+            {
                 await Task.CompletedTask;
                 throw exception;
             }).Verifiable();
