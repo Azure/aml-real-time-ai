@@ -10,6 +10,8 @@ namespace CSharpClient
 {
     public class ScoringClient
     {
+        private const int RetryCount = 10;
+
         private readonly IPredictionServiceClient _client;
 
         public ScoringClient(IPredictionServiceClient client)
@@ -28,7 +30,8 @@ namespace CSharpClient
             if (authKey != null && useSsl)
             {
                 creds = ChannelCredentials.Create(baseCreds, CallCredentials.FromInterceptor(
-                      async (context, metadata) => {
+                      async (context, metadata) =>
+                      {
                           metadata.Add(new Metadata.Entry("authorization", authKey));
                           await Task.CompletedTask;
                       }));
@@ -41,27 +44,26 @@ namespace CSharpClient
             _client = new PredictionServiceClientWrapper(new PredictionService.PredictionServiceClient(channel));
         }
 
-        public async Task<float[]> ScoreAsync(IScoringRequest request)
+        public async Task<float[]> ScoreAsync(IScoringRequest request, int retryCount = RetryCount)
         {
-            return await ScoreAsync<float[]>(request);
+            return await ScoreAsync<float[]>(request, retryCount);
         }
 
-        public async Task<T> ScoreAsync<T>(IScoringRequest request) where T : class
+        public async Task<T> ScoreAsync<T>(IScoringRequest request, int retryCount = RetryCount) where T : class
         {
             var predictRequest = request.MakePredictRequest();
 
-            return await RetryAsync(async () => {
+            return await RetryAsync(async () =>
+            {
                 var result = await _client.PredictAsync(predictRequest);
                 return result.Outputs["output_alias"].Convert<T>();
-            });
+            }, retryCount);
         }
 
-        private static async Task<T> RetryAsync<T>(
-            Func<Task<T>> operation, int retryCount = 20,
-            int initialDelayInMs = 500, int maxDelayInMs = 10000)
+        private async Task<T> RetryAsync<T>(
+            Func<Task<T>> operation, int retryCount = RetryCount
+            )
         {
-            var delay = initialDelayInMs;
-
             while (true)
             {
                 try
@@ -74,9 +76,6 @@ namespace CSharpClient
                     {
                         throw;
                     }
-
-                    await Task.Delay(delay);
-                    delay = Math.Min(2 * delay, maxDelayInMs);
                 }
             }
         }
