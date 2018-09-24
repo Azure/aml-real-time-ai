@@ -1,32 +1,30 @@
 # Microsoft Azure Machine Learning Hardware Accelerated Models Powered by Project Brainwave
 
-Easily create and train a model using ResNet 50 as a featurizer for deployment on Azure for ultra-low latency inferencing.
+Easily create and train a model using various deep neural networks (DNNs) as a featurizer for deployment on Azure for ultra-low latency inferencing.
 
 ## How to get access
 
-Azure ML Hardware Accelerated Models is currently in preview.
+Azure ML Hardware Accelerated Models is currently in preview.  You must apply for quota by following the instructions below.
 
-### Step 1: Create an Azure ML Model Management Account
+### Step 1: Create an Azure ML workspace
 
-Go to the [Azure Portal](https://aka.ms/aml-create-mma) and create an Azure ML Model Management Account (MMA).  [Learn how to create a MMA](docs/README.md#create-azure-ml-model-management-account).  If you already have an existing S1, S2, or S3 account in the East US 2 location, you may skip this step.  The DevTest tier is not supported.
+Follow the instructions in the 00.configuration.ipynb notebook in the [Azure ML MachineLearningNotebooks](https://aka.ms/aml-notebooks) repo.
 
-**Note:** Only accounts in the **East US 2** region are currently supported.
+You will create an Azure Machine Learning workspace, which is required for the next step.
+
+**Note:** Only workspaces in the **East US 2** region are currently supported.
 
 ### Step 2: Fill out the request form
 
 [Request quota](https://aka.ms/aml-real-time-ai-request) by submitting the form.
 
-You will need the name of your MMA from Step 1 ([learn how to get the MMA name](docs/README.md#get-mma-information)).
+You will need information from your workspace created in Step 1 ([learn how to get workspace information](docs/README.md)).
 
 You will receive an email if your quota request has been successful.
 
-### Step 3: Set up environment
+### Step 3: Deploy your service
 
-Follow [these instructions](docs/README.md#set-up-environment) to set up your environment.
-
-### Step 4: Deploy your service
-
-Check out the sample notebooks [here](notebooks/resnet50).  You can easily deploy a ResNet 50 classifier by running the [Quickstart notebook](notebooks/resnet50/00_QuickStart.ipynb).
+Check out the sample notebooks [here](https://aka.ms/aml-notebooks) under project-brainwave.
 
 ## Support
 Read the [docs](docs) or visit the [forum](https://aka.ms/aml-forum).

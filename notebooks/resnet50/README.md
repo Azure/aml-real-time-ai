@@ -1,5 +1,3 @@
 # Sample notebooks
 
-These notebooks will guide you through the process to train your model for deployment using Azure Machine Learning.
-
-Read the [docs](../docs) for help or email amlfpgafc@microsoft.com.
+Sample notebooks are available in the [Azure ML MachineLearningNotebooks](https://aka.ms/aml-notebooks) repo under the project-brainwave folder.
