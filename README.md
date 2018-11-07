@@ -4,7 +4,7 @@ Easily create and train a model using various deep neural networks (DNNs) as a f
 
 ## How to get access
 
-Azure ML Hardware Accelerated Models is currently in preview.  You must apply for quota by following the instructions below.
+Azure ML Hardware Accelerated Models is currently in preview.
 
 ### Step 1: Create an Azure ML workspace
 
@@ -14,17 +14,11 @@ You will create an Azure Machine Learning workspace, which is required for the n
 
 **Note:** Only workspaces in the **East US 2** region are currently supported.
 
-### Step 2: Fill out the request form
-
-[Request quota](https://aka.ms/aml-real-time-ai-request) by submitting the form.
-
-You will need information from your workspace created in Step 1 ([learn how to get workspace information](docs/README.md)).
-
-You will receive an email if your quota request has been successful.
-
-### Step 3: Deploy your service
+### Step 2: Deploy your service
 
 Check out the sample notebooks [here](https://aka.ms/aml-notebooks) under project-brainwave.
+
+**Note:** If you want to deploy more than one service, you must [request quota](https://aka.ms/aml-real-time-ai-request) by submitting the form.  You will need information from your workspace created in Step 1 ([learn how to get workspace information](docs/README.md)).  You will receive an email if your quota request has been successful.
 
 ## Support
 Read the [docs](docs) or visit the [forum](https://aka.ms/aml-forum).
