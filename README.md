@@ -8,11 +8,16 @@ Azure ML Hardware Accelerated Models is currently in preview.
 
 ### Step 1: Create an Azure ML workspace
 
-Follow the instructions in the 00.configuration.ipynb notebook in the [Azure ML MachineLearningNotebooks](https://aka.ms/aml-notebooks) repo.
+Follow the instructions in the 00.configuration.ipynb notebook in the [Azure ML MachineLearningNotebooks](https://aka.ms/aml-notebooks) repo.  You will create an Azure Machine Learning workspace, which is required for the next step.
 
-You will create an Azure Machine Learning workspace, which is required for the next step.
+Once you have set up your environment, install the contrib extras:
 
+```sh
+pip install --upgrade azureml-sdk[contrib]
+```
 **Note:** Only workspaces in the **East US 2** region are currently supported.
+
+Go to the [documentation](https://docs.microsoft.com/en-us/azure/machine-learning/service/how-to-deploy-fpga-web-service) page for any questions.
 
 ### Step 2: Deploy your service
 
