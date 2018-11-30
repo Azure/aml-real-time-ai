@@ -1,6 +1,11 @@
 # Microsoft Azure Machine Learning Hardware Accelerated Models Powered by Project Brainwave
 
-Easily create and train a model using various deep neural networks (DNNs) as a featurizer for deployment on Azure for ultra-low latency inferencing.
+Easily create and train a model using various deep neural networks (DNNs) as a featurizer for deployment on Azure for ultra-low latency inferencing.  These models are currently available:
+
+* ResNet 50
+* ResNet 152
+* DenseNet-121
+* VGG-16
 
 ## How to get access
 
