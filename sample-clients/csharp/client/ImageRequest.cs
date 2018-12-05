@@ -13,23 +13,24 @@ namespace CSharpClient
     {
         private readonly ModelSpec _modelSpec;
         private readonly Stream[] _images;
+        private readonly TensorProto proto;
 
         public ImageRequest(params Stream[] images)
         {
             _modelSpec = new ModelSpec();
             _images = images;
-        }
-
-        public PredictRequest MakePredictRequest()
-        {
-            var request = new PredictRequest { ModelSpec = _modelSpec };
-            var proto = new TensorProto { Dtype = DataType.DtString };
+            proto = new TensorProto { Dtype = DataType.DtString };
 
             var bytes = _images.Select(ByteString.FromStream);
             proto.StringVal.AddRange(bytes);
             proto.TensorShape = new TensorShapeProto();
             proto.TensorShape.Dim.Add(new TensorShapeProto.Types.Dim());
             proto.TensorShape.Dim[0].Size = _images.Length;
+        }
+
+        public PredictRequest MakePredictRequest()
+        {
+            var request = new PredictRequest { ModelSpec = _modelSpec };
 
             request.Inputs["images"] = proto;
             return request;

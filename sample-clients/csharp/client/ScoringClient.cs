@@ -40,7 +40,7 @@ namespace CSharpClient
             {
                 creds = baseCreds;
             }
-            var channel = new Channel(host, port, creds);
+            var channel = new Channel(host, port, creds, new ChannelOption[] { });
             _client = new PredictionServiceClientWrapper(new PredictionService.PredictionServiceClient(channel));
         }
 

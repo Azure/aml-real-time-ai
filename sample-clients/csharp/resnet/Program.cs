@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -14,7 +15,7 @@ namespace resnet
 {
     internal class Program
     {
-        private static readonly string errorMessage = "" + Environment.NewLine + "dotnet resnet.dll [url(without port)] [path/to/local/image] <use_ssl (true/false - false if absent)> <auth_key (use_ssl must be true)>";
+        private static readonly string errorMessage = "" + Environment.NewLine + "resnet.exe [url(without port)] [path/to/local/image]";
 
         private static int Main(string[] args)
         {
@@ -53,7 +54,15 @@ namespace resnet
             using (var content = File.OpenRead(image))
             {
                 IScoringRequest request = new ImageRequest(content);
+                Console.WriteLine("100 sequential scoring requests.");
+                var timer = Stopwatch.StartNew();
                 var result = await client.ScoreAsync<float[,]>(request);
+                for (int i = 0; i < 99; i++)
+                {
+                    await client.ScoreAsync<float[,]>(request);
+                }
+                timer.Stop();
+                var elapsed = timer.ElapsedMilliseconds;
                 for (int i = 0; i < result.GetLength(0); i++)
                 {
                     Console.WriteLine($"Batch {i}:");
@@ -70,6 +79,7 @@ namespace resnet
                             $"    {GetLabel(kvp.Key)} {kvp.Value * 100}%");
                     }
                 }
+                Console.WriteLine($"Scored 100 sequential requests in {elapsed} ms ({elapsed / 100} per request).");
             }
 
             return 0;

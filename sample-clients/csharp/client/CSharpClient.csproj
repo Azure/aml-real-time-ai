@@ -8,7 +8,7 @@
   <ItemGroup>
     <PackageReference Include="Google.Protobuf" Version="3.4.1" />
     <PackageReference Include="Google.Protobuf.Tools" Version="3.4.0" />
-    <PackageReference Include="Grpc" Version="1.7.1" />
+    <PackageReference Include="Grpc" Version="1.17.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.3.0-preview-20170628-02" />
     <PackageReference Include="protobuf" Version="2.6.1.1" />
   </ItemGroup>
