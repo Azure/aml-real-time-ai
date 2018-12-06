@@ -12,26 +12,25 @@ namespace CSharpClient
     public class ImageRequest : IScoringRequest
     {
         private readonly ModelSpec _modelSpec;
-        private readonly Stream[] _images;
+        private readonly TensorProto _proto;
 
         public ImageRequest(params Stream[] images)
         {
             _modelSpec = new ModelSpec();
-            _images = images;
+            _proto = new TensorProto { Dtype = DataType.DtString };
+
+            var bytes = images.Select(ByteString.FromStream);
+            _proto.StringVal.AddRange(bytes);
+            _proto.TensorShape = new TensorShapeProto();
+            _proto.TensorShape.Dim.Add(new TensorShapeProto.Types.Dim());
+            _proto.TensorShape.Dim[0].Size = images.Length;
         }
 
         public PredictRequest MakePredictRequest()
         {
             var request = new PredictRequest { ModelSpec = _modelSpec };
-            var proto = new TensorProto { Dtype = DataType.DtString };
 
-            var bytes = _images.Select(ByteString.FromStream);
-            proto.StringVal.AddRange(bytes);
-            proto.TensorShape = new TensorShapeProto();
-            proto.TensorShape.Dim.Add(new TensorShapeProto.Types.Dim());
-            proto.TensorShape.Dim[0].Size = _images.Length;
-
-            request.Inputs["images"] = proto;
+            request.Inputs["images"] = _proto;
             return request;
         }
     }
