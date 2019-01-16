@@ -13,7 +13,7 @@ Azure ML Hardware Accelerated Models is currently in preview.
 
 ### Step 1: Create an Azure ML workspace
 
-Follow the instructions in the 00.configuration.ipynb notebook in the [Azure ML MachineLearningNotebooks](https://aka.ms/aml-notebooks) repo.  You will create an Azure Machine Learning workspace, which is required for the next step.
+Follow [these instructions](https://docs.microsoft.com/en-us/azure/machine-learning/service/quickstart-create-workspace-with-python) to create an Azure Machine Learning workspace and set up your notebook environment, which is required for the next step.
 
 **Note:** Only workspaces in the **East US 2** region are currently supported.
 
@@ -29,7 +29,7 @@ Go to the [documentation](https://docs.microsoft.com/en-us/azure/machine-learnin
 
 Check out the sample notebooks [here](https://aka.ms/aml-notebook-proj-brainwave).
 
-**Note:** If you want to deploy more than one service, you must [request quota](https://aka.ms/aml-real-time-ai-request) by submitting the form.  You will need information from your workspace created in Step 1 ([learn how to get workspace information](docs/README.md)).  You will receive an email if your quota request has been successful.
+**Note:** You can deploy one FPGA service.  If you want to deploy more than one service, you must [request quota](https://aka.ms/aml-real-time-ai-request) by submitting the form.  You will need information from your workspace created in Step 1 ([learn how to get workspace information](docs/README.md)).  You will receive an email if your quota request has been successful.
 
 ## Support
 Read the [docs](docs) or visit the [forum](https://aka.ms/aml-forum).
