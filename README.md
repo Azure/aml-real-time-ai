@@ -13,7 +13,7 @@ Azure ML Hardware Accelerated Models is currently in preview.
 
 ### Step 1: Create an Azure ML workspace
 
-Follow [these instructions](https://docs.microsoft.com/en-us/azure/machine-learning/service/quickstart-create-workspace-with-python) to create an Azure Machine Learning workspace and set up your notebook environment, which is required for the next step.
+Follow [these instructions](https://docs.microsoft.com/en-us/azure/machine-learning/service/quickstart-create-workspace-with-python) to install the Azure ML SDK on your local machine, create an Azure ML workspace, and set up your notebook environment, which is required for the next step.
 
 **Note:** Only workspaces in the **East US 2** region are currently supported.
 
@@ -21,6 +21,12 @@ Once you have set up your environment, install the contrib extras:
 
 ```sh
 pip install --upgrade azureml-sdk[contrib]
+```
+
+Currently only tensorflow version<=1.10 is supported, so install it at the end:
+
+```sh
+pip install "tensorflow==1.10"
 ```
 
 Go to the [documentation](https://docs.microsoft.com/en-us/azure/machine-learning/service/how-to-deploy-fpga-web-service) page for any questions.
