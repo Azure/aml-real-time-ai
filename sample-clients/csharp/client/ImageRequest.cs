@@ -14,6 +14,8 @@ namespace CSharpClient
         private readonly ModelSpec _modelSpec;
         private readonly TensorProto _proto;
 
+        private readonly string _inputName;
+
         public ImageRequest(params Stream[] images)
         {
             _modelSpec = new ModelSpec();
@@ -24,13 +26,27 @@ namespace CSharpClient
             _proto.TensorShape = new TensorShapeProto();
             _proto.TensorShape.Dim.Add(new TensorShapeProto.Types.Dim());
             _proto.TensorShape.Dim[0].Size = images.Length;
+            _inputName = "images";
+        }
+
+        public ImageRequest(string inputName, params Stream[] images)
+        {
+            _modelSpec = new ModelSpec();
+            _proto = new TensorProto { Dtype = DataType.DtString };
+
+            var bytes = images.Select(ByteString.FromStream);
+            _proto.StringVal.AddRange(bytes);
+            _proto.TensorShape = new TensorShapeProto();
+            _proto.TensorShape.Dim.Add(new TensorShapeProto.Types.Dim());
+            _proto.TensorShape.Dim[0].Size = images.Length;
+            _inputName = inputName;
         }
 
         public PredictRequest MakePredictRequest()
         {
             var request = new PredictRequest { ModelSpec = _modelSpec };
 
-            request.Inputs["images"] = _proto;
+            request.Inputs[this._inputName] = _proto;
             return request;
         }
     }
