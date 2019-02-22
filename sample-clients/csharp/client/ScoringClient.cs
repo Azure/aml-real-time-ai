@@ -8,6 +8,9 @@ using Tensorflow.Serving;
 
 namespace CSharpClient
 {
+    using System.Collections.Generic;
+    using System.Linq;
+
     public class ScoringClient
     {
         private const int RetryCount = 10;
@@ -44,20 +47,28 @@ namespace CSharpClient
             _client = new PredictionServiceClientWrapper(new PredictionService.PredictionServiceClient(channel));
         }
 
-        public async Task<float[]> ScoreAsync(IScoringRequest request, int retryCount = RetryCount)
+        public async Task<float[]> ScoreAsync(IScoringRequest request, int retryCount = RetryCount, string output_name = "output_alias")
         {
-            return await ScoreAsync<float[]>(request, retryCount);
+            return await ScoreAsync<float[]>(request, retryCount, output_name);
         }
 
-        public async Task<T> ScoreAsync<T>(IScoringRequest request, int retryCount = RetryCount) where T : class
+        public async Task<T> ScoreAsync<T>(IScoringRequest request, int retryCount = RetryCount, string output_name = "output_alias") where T : class
+        {
+            var predictRequest = request.MakePredictRequest();
+
+            return (await this.PredictAsync<T>(request, retryCount))[output_name];
+        }
+
+        public async Task<Dictionary<string, T>> PredictAsync<T>(IScoringRequest request, int retryCount = RetryCount) where T : class
         {
             var predictRequest = request.MakePredictRequest();
 
             return await RetryAsync(async () =>
-            {
-                var result = await _client.PredictAsync(predictRequest);
-                return result.Outputs["output_alias"].Convert<T>();
-            }, retryCount);
+                {
+                    var result = await _client.PredictAsync(predictRequest);
+                    return result.Outputs.ToDictionary(
+                        kvp => kvp.Key, kvp => kvp.Value.Convert<T>());
+                }, retryCount);
         }
 
         private async Task<T> RetryAsync<T>(
