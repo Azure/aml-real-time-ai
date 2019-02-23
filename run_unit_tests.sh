@@ -6,8 +6,8 @@ if [ $ERR -ne 0 ]
 then
     exit $ERR
 fi
-
-
+echo ". /usr/share/miniconda/etc/profile.d/conda.sh" >> ~/.bashrc
+conda update -n bace -c defaults conda
 conda env create -f environment.yml
 conda activate amlrealtimeai
 conda install -y pytest pytest-cov
