@@ -56,6 +56,6 @@ contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additio
 
 ## Build Status
 
-System | Unit tests | Integration Tests
---- | --- | ---
-Ubuntu 16.04 | [![Build Status](https://msdata.visualstudio.com/_apis/public/build/definitions/3adb301f-9ede-41f2-933b-fcd1a486ff7f/2908/badge)](https://msdata.visualstudio.com/Vienna/_build/index?definitionId=2908) | [![Build Status](https://msdata.visualstudio.com/_apis/public/build/definitions/3adb301f-9ede-41f2-933b-fcd1a486ff7f/2916/badge)](https://msdata.visualstudio.com/Vienna/_build/index?definitionId=2916)
+System | Unit tests 
+--- | ---
+Ubuntu 16.04 | [![Build Status](https://dev.azure.com/coverste/aml-rt-ai/_apis/build/status/Azure.aml-real-time-ai?branchName=master)](https://dev.azure.com/coverste/aml-rt-ai/_build/latest?definitionId=1&branchName=master)
