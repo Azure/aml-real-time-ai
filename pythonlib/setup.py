@@ -51,7 +51,6 @@ setup(
         # eg: 'keyword1', 'keyword2', 'keyword3',
     ],
     install_requires=[
-        'tensorflow==1.6.0', 'keras==2.1.5', 'requests==2.18.4', 'adal==1.0.2', 'azure-storage', 'azure.mgmt.storage==1.5.0'
     ],
     extras_require={
         # eg:

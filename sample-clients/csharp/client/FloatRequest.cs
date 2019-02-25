@@ -41,6 +41,7 @@ namespace CSharpClient
             var proto = new TensorProto { Dtype = DataType.DtFloat };
             proto.FloatVal.AddRange(input.Item1);
             var dims = input.Item2.Select(dim => new TensorShapeProto.Types.Dim { Size = dim });
+            proto.TensorShape = new TensorShapeProto();
             proto.TensorShape.Dim.AddRange(dims);
             return proto;
         }
