@@ -1,0 +1,20 @@
+pool:
+
+  vmImage: Hosted Ubuntu 1604
+
+  demands: sh
+
+
+
+steps:
+
+- task: ShellScript@2
+
+  displayName: 'Run unit tests'
+
+  inputs:
+
+    scriptPath: 'run_unit_tests.sh'
+
+
+
