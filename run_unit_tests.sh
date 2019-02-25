@@ -8,7 +8,6 @@ then
 fi
 source /usr/share/miniconda/etc/profile.d/conda.sh
 
-conda update -n base -c defaults conda
 conda env create -f environment.yml
 conda activate amlrealtimeai
 conda install -y pytest pytest-cov
