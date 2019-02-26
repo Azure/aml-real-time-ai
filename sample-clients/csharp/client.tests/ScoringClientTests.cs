@@ -42,6 +42,34 @@ namespace CSharpClient.Tests
             predictionServiceClientMock.Verify(x => x.PredictAsync(predictRequest), Times.Exactly(1));
         }
 
+        [Fact]
+        public async Task Invokes_predict_async_call_float_input()
+        {
+            var expectedResultValues = new[] { 1f, 2f, 3f };
+
+            var outputTensorProto = new TensorProto { Dtype = DataType.DtFloat };
+            outputTensorProto.FloatVal.Add(expectedResultValues);
+
+            outputTensorProto.TensorShape = new TensorShapeProto();
+            outputTensorProto.TensorShape.Dim.Add(new TensorShapeProto.Types.Dim());
+            outputTensorProto.TensorShape.Dim[0].Size = 3;
+
+            var predictResponse = new PredictResponse();
+            predictResponse.Outputs.Add("output_alias", outputTensorProto);
+
+            var predictionServiceClientMock = new Mock<IPredictionServiceClient>();
+            predictionServiceClientMock.Setup(x => x.PredictAsync(It.IsAny<PredictRequest>())).ReturnsAsync(predictResponse).Verifiable();
+
+            var scoringRequestMock = new FloatRequest(new Dictionary<string, float[]>() { { "x:0", new[] { 1.0f } } });
+
+            var scoringClient = new ScoringClient(predictionServiceClientMock.Object);
+            var result = await scoringClient.ScoreAsync(scoringRequestMock);
+
+            Assert.Equal(expectedResultValues, result);
+
+            predictionServiceClientMock.Verify(x => x.PredictAsync(It.IsAny<PredictRequest>()), Times.Exactly(1));
+        }
+
         [Theory]
         [InlineData(StatusCode.DeadlineExceeded)]
         [InlineData(StatusCode.Unavailable)]
