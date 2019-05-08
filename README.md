@@ -1,5 +1,8 @@
 # Microsoft Azure Machine Learning Hardware Accelerated Models Powered by Project Brainwave
 
+## IMPORTANT!
+This service is now generally available, and this repo will be shut down.  Please use the [updated notebooks](http://aka.ms/aml-accel-models-notebooks) and read the [updated documentation](https://docs.microsoft.com/en-us/azure/machine-learning/service/how-to-deploy-fpga-web-service).
+
 Easily create and train a model using various deep neural networks (DNNs) as a featurizer for deployment on Azure for ultra-low latency inferencing.  These models are currently available:
 
 * ResNet 50
